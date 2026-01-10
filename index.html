@@ -1,215 +1,205 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Facebook, 
-  Instagram, 
-  MessageCircle, 
-  BookOpen, 
-  Clock, 
-  Target, 
-  Sparkles, 
-  Compass, 
-  ExternalLink,
-  Calendar,
-  ChevronRight,
-  Mail
-} from 'lucide-react';
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>老K的命理實驗室 | K FACE & HAND</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        .hero-gradient {
+            background: radial-gradient(circle at 70% 20%, rgba(254, 243, 199, 0.5) 0%, transparent 50%),
+                        radial-gradient(circle at 10% 80%, rgba(255, 241, 242, 0.6) 0%, transparent 50%);
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-slate-700 selection:bg-amber-100 overflow-x-hidden">
 
-const App = () => {
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const services = [
-    {
-      title: "手面相諮詢",
-      price: "3600 / 小時",
-      desc: "提供實體（台南）或線上視訊諮詢。透過細膩的手面相解析，協助您找回內心的穩定力量。",
-      icon: <Sparkles className="w-6 h-6" />
-    },
-    {
-      title: "當面占卜諮詢",
-      price: "3600 / 小時",
-      desc: "包含氣色觀察與手面相輔助，結合塔羅或六爻卦象，全方位解答您的心中疑惑。",
-      icon: <Compass className="w-6 h-6" />
-    },
-    {
-      title: "老客人流年氣色",
-      price: "3000 / 小時",
-      desc: "專為老客戶提供的定期運勢守護，重點觀察當年度的氣色起伏與流年建議。",
-      icon: <Clock className="w-6 h-6" />
-    },
-    {
-      title: "單次書面卜卦",
-      price: "500 / 一事",
-      desc: "針對單一具體事件（非實體）。提供精準的書面分析，適合需要快速決策的時刻。",
-      icon: <BookOpen className="w-6 h-6" />
-    }
-  ];
-
-  const specialties = [
-    "事業傾向", "職涯調整", "流年建議", "感情盲點"
-  ];
-
-  return (
-    <div className="min-h-screen bg-stone-50 text-slate-700 font-sans selection:bg-amber-100">
-      {/* Navigation */}
-      <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'bg-white/80 backdrop-blur-md py-4 shadow-sm' : 'bg-transparent py-6'}`}>
-        <div className="max-w-5xl mx-auto px-6 flex justify-between items-center">
-          <span className="text-xl font-bold tracking-tight text-amber-700">K FACE & HAND</span>
-          <div className="flex gap-4">
-            <a href="https://facebook.com/kfacehand" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-amber-600 transition-colors"><Facebook size={20} /></a>
-            <a href="https://instagram.com/kfacehand" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-amber-600 transition-colors"><Instagram size={20} /></a>
-          </div>
+    <!-- Navigation -->
+    <nav id="navbar" class="fixed w-full z-50 transition-all duration-300 bg-transparent py-6">
+        <div class="max-w-5xl mx-auto px-6 flex justify-between items-center">
+            <span class="text-xl font-bold tracking-tight text-amber-700">K FACE & HAND</span>
+            <div class="flex gap-4">
+                <a href="https://facebook.com/kfacehand" target="_blank" class="text-slate-400 hover:text-amber-600 transition-colors">
+                    <i data-lucide="facebook" class="w-5 h-5"></i>
+                </a>
+                <a href="https://instagram.com/kfacehand" target="_blank" class="text-slate-400 hover:text-amber-600 transition-colors">
+                    <i data-lucide="instagram" class="w-5 h-5"></i>
+                </a>
+            </div>
         </div>
-      </nav>
+    </nav>
 
-      {/* Hero Section */}
-      <section className="relative pt-32 pb-24 px-6 overflow-hidden">
-        {/* Warm Background Shapes */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none overflow-hidden">
-          <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-amber-100/50 rounded-full blur-[100px]"></div>
-          <div className="absolute bottom-[10%] left-[-5%] w-[400px] h-[400px] bg-rose-50/60 rounded-full blur-[80px]"></div>
+    <!-- Hero Section -->
+    <section class="relative pt-32 pb-24 px-6 hero-gradient">
+        <div class="max-w-4xl mx-auto text-center relative z-10">
+            <!-- Profile Photo -->
+            <div class="mb-8 relative inline-block">
+                <div class="w-32 h-32 md:w-44 md:h-44 rounded-2xl border-4 border-white shadow-xl p-0 mx-auto overflow-hidden bg-white rotate-3 hover:rotate-0 transition-transform duration-500">
+                    <img 
+                        src="/api/placeholder/400/400" 
+                        alt="老K" 
+                        class="w-full h-full object-cover grayscale-[20%] hover:grayscale-0 transition-all"
+                        onerror="this.src='https://ui-avatars.com/api/?name=K&background=d97706&color=fff&size=200'"
+                    >
+                </div>
+                <div class="absolute -bottom-2 right-4 bg-white text-amber-700 px-4 py-1 rounded-full text-sm font-bold shadow-md border border-amber-50/50">
+                    台南 / 線上諮詢
+                </div>
+            </div>
+            
+            <h1 class="text-4xl md:text-6xl font-bold mb-6 text-slate-800 tracking-tight leading-tight">
+                你被人 K，<br class="md:hidden">
+                <span class="text-amber-600">來找老K。</span>
+            </h1>
+            <p class="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed mb-10">
+                用溫潤專業的角度，為您解析事業、職涯與情感。<br> 
+                在人生的十字路口，老K陪您看清未來的方向。
+            </p>
+            
+            <!-- CTAs -->
+            <div class="flex flex-wrap justify-center gap-4">
+                <a 
+                    href="https://facebook.com/kfacehand"
+                    target="_blank"
+                    class="bg-amber-600 hover:bg-amber-700 text-white font-bold py-4 px-10 rounded-full transition-all shadow-lg shadow-amber-600/20 flex items-center gap-2 group"
+                >
+                    <i data-lucide="calendar" class="w-5 h-5"></i> 私訊預約諮詢
+                    <i data-lucide="chevron-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
+                </a>
+                <a 
+                    href="https://kfacebook.com/wiki.html" 
+                    class="bg-white hover:bg-stone-50 text-slate-600 font-bold py-4 px-10 rounded-full transition-all border border-stone-200 flex items-center gap-2 shadow-sm"
+                >
+                    <i data-lucide="book-open" class="w-5 h-5"></i> 知識庫 (Wiki) <span class="text-xs font-normal text-slate-400">開啟較慢</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Specialties -->
+    <section class="py-8 px-6 bg-white/50 backdrop-blur-sm border-y border-stone-200/60 shadow-sm">
+        <div class="max-w-5xl mx-auto flex flex-wrap justify-center gap-4 md:gap-12 text-slate-600">
+            <div class="flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-amber-500"></div><span class="font-semibold uppercase tracking-wide">事業傾向</span></div>
+            <div class="flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-amber-500"></div><span class="font-semibold uppercase tracking-wide">職涯調整</span></div>
+            <div class="flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-amber-500"></div><span class="font-semibold uppercase tracking-wide">流年建議</span></div>
+            <div class="flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-amber-500"></div><span class="font-semibold uppercase tracking-wide">感情盲點</span></div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="py-24 px-6 max-w-5xl mx-auto">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl font-bold mb-4 text-slate-800">服務項目</h2>
+            <div class="w-12 h-1 bg-amber-500 mx-auto rounded-full"></div>
         </div>
         
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <div className="mb-8 relative inline-block">
-            <div className="w-32 h-32 md:w-44 md:h-44 rounded-2xl border-4 border-white shadow-xl p-0 mx-auto overflow-hidden bg-white rotate-3 hover:rotate-0 transition-transform duration-500">
-               <img 
-                  src="/api/placeholder/400/400" 
-                  alt="老K" 
-                  className="w-full h-full object-cover grayscale-[20%] hover:grayscale-0 transition-all"
-                  onError={(e) => e.target.src = "https://ui-avatars.com/api/?name=K&background=d97706&color=fff&size=200"}
-               />
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Service 1 -->
+            <div class="group p-8 rounded-3xl bg-white border border-stone-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-500">
+                <div class="bg-amber-50 w-14 h-14 rounded-2xl flex items-center justify-center text-amber-600 mb-6 group-hover:scale-110 transition-transform">
+                    <i data-lucide="sparkles"></i>
+                </div>
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
+                    <h3 class="text-xl font-bold text-slate-800">手面相諮詢</h3>
+                    <span class="text-amber-700 font-mono font-bold bg-amber-50 px-3 py-1 rounded-lg text-sm">3600 / 小時</span>
+                </div>
+                <p class="text-slate-500 leading-relaxed text-sm md:text-base">提供實體（台南）或線上視訊諮詢。透過細膩的手面相解析，協助您找回內心的穩定力量。</p>
             </div>
-            <div className="absolute -bottom-2 right-4 bg-white text-amber-700 px-4 py-1 rounded-full text-sm font-bold shadow-md border border-amber-50/50">
-              台南 / 線上諮詢
+            <!-- Service 2 -->
+            <div class="group p-8 rounded-3xl bg-white border border-stone-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-500">
+                <div class="bg-amber-50 w-14 h-14 rounded-2xl flex items-center justify-center text-amber-600 mb-6 group-hover:scale-110 transition-transform">
+                    <i data-lucide="compass"></i>
+                </div>
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
+                    <h3 class="text-xl font-bold text-slate-800">當面占卜諮詢</h3>
+                    <span class="text-amber-700 font-mono font-bold bg-amber-50 px-3 py-1 rounded-lg text-sm">3600 / 小時</span>
+                </div>
+                <p class="text-slate-500 leading-relaxed text-sm md:text-base">包含氣色觀察與手面相輔助，結合塔羅或六爻卦象，全方位解答您的心中疑惑。</p>
             </div>
-          </div>
-          
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 text-slate-800 tracking-tight leading-tight">
-            你被人 K，<br className="md:hidden" />
-            <span className="text-amber-600">來找老K。</span>
-          </h1>
-          <p className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed mb-10">
-            用溫潤專業的角度，為您解析事業、職涯與情感。<br /> 
-            在人生的十字路口，老K陪您看清未來的方向。
-          </p>
-          
-          <div className="flex flex-wrap justify-center gap-4">
-            <a 
-              href="https://facebook.com/kfacehand"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-amber-600 hover:bg-amber-700 text-white font-bold py-4 px-10 rounded-full transition-all shadow-lg shadow-amber-600/20 flex items-center gap-2 group"
-            >
-              <Calendar size={18} /> 私訊預約諮詢
-              <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
-            </a>
-            <a 
-              href="https://kfacebook.com/wiki.html" 
-              className="bg-white hover:bg-stone-50 text-slate-600 font-bold py-4 px-10 rounded-full transition-all border border-stone-200 flex items-center gap-2 shadow-sm"
-            >
-              <BookOpen size={18} /> 知識庫 (Wiki) <span className="text-xs font-normal text-slate-400">開啟較慢</span>
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* Specialties - Warm pill tags */}
-      <section className="py-8 px-6 bg-white/50 backdrop-blur-sm border-y border-stone-200/60 shadow-sm">
-        <div className="max-w-5xl mx-auto flex flex-wrap justify-center gap-4 md:gap-12">
-          {specialties.map((item, idx) => (
-            <div key={idx} className="flex items-center gap-2 text-slate-600">
-              <div className="w-1.5 h-1.5 rounded-full bg-amber-500"></div>
-              <span className="text-md font-semibold tracking-wide uppercase">{item}</span>
+            <!-- Service 3 -->
+            <div class="group p-8 rounded-3xl bg-white border border-stone-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-500">
+                <div class="bg-amber-50 w-14 h-14 rounded-2xl flex items-center justify-center text-amber-600 mb-6 group-hover:scale-110 transition-transform">
+                    <i data-lucide="clock"></i>
+                </div>
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
+                    <h3 class="text-xl font-bold text-slate-800">老客人流年氣色</h3>
+                    <span class="text-amber-700 font-mono font-bold bg-amber-50 px-3 py-1 rounded-lg text-sm">3000 / 小時</span>
+                </div>
+                <p class="text-slate-500 leading-relaxed text-sm md:text-base">專為老客戶提供的定期運勢守護，重點觀察當年度的氣色起伏與流年建議。</p>
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Services Grid */}
-      <section className="py-24 px-6 max-w-5xl mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold mb-4 text-slate-800">服務項目</h2>
-          <div className="w-12 h-1 bg-amber-500 mx-auto rounded-full"></div>
+            <!-- Service 4 -->
+            <div class="group p-8 rounded-3xl bg-white border border-stone-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-500">
+                <div class="bg-amber-50 w-14 h-14 rounded-2xl flex items-center justify-center text-amber-600 mb-6 group-hover:scale-110 transition-transform">
+                    <i data-lucide="book-open"></i>
+                </div>
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
+                    <h3 class="text-xl font-bold text-slate-800">單次書面卜卦</h3>
+                    <span class="text-amber-700 font-mono font-bold bg-amber-50 px-3 py-1 rounded-lg text-sm">500 / 一事</span>
+                </div>
+                <p class="text-slate-500 leading-relaxed text-sm md:text-base">針對單一具體事件（非實體）。提供精準的書面分析，適合需要快速決策的時刻。</p>
+            </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {services.map((s, idx) => (
-            <div key={idx} className="group p-8 rounded-3xl bg-white border border-stone-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-500">
-              <div className="bg-amber-50 w-14 h-14 rounded-2xl flex items-center justify-center text-amber-600 mb-6 group-hover:scale-110 transition-transform">
-                {s.icon}
-              </div>
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
-                <h3 className="text-xl font-bold text-slate-800">{s.title}</h3>
-                <span className="text-amber-700 font-mono font-bold bg-amber-50 px-3 py-1 rounded-lg text-sm">{s.price}</span>
-              </div>
-              <p className="text-slate-500 leading-relaxed text-sm md:text-base">
-                {s.desc}
-              </p>
+        <div class="mt-12 p-8 rounded-3xl bg-stone-100/50 border border-stone-200 text-center">
+            <p class="text-slate-500 text-sm">
+                <span class="font-bold text-amber-700">老K溫馨提示：</span>到府看相或教學課程需另行評估議價，歡迎直接與我聯繫討論細節。
+            </p>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="py-20 px-6 bg-stone-50">
+        <div class="max-w-5xl mx-auto text-center">
+            <h3 class="text-lg font-bold text-slate-400 mb-10 uppercase tracking-[0.2em]">聯絡老K</h3>
+            <div class="flex flex-wrap justify-center gap-x-12 gap-y-8">
+                <a href="https://facebook.com/kfacehand" target="_blank" class="flex items-center gap-2 text-slate-500 hover:text-blue-600 transition-all font-semibold">
+                    <i data-lucide="facebook" class="w-6 h-6"></i> Facebook
+                </a>
+                <a href="https://instagram.com/kfacehand" target="_blank" class="flex items-center gap-2 text-slate-500 hover:text-pink-600 transition-all font-semibold">
+                    <i data-lucide="instagram" class="w-6 h-6"></i> Instagram
+                </a>
+                <a href="https://threads.net/@kfacehand" target="_blank" class="flex items-center gap-2 text-slate-500 hover:text-slate-900 transition-all font-semibold">
+                    <i data-lucide="message-circle" class="w-6 h-6"></i> Threads
+                </a>
+                <a href="mailto:k@kfacehand.com" class="flex items-center gap-2 text-slate-500 hover:text-amber-600 transition-all font-semibold">
+                    <i data-lucide="mail" class="w-6 h-6"></i> k@kfacehand.com
+                </a>
             </div>
-          ))}
         </div>
-        
-        <div className="mt-12 p-8 rounded-3xl bg-stone-100/50 border border-stone-200 text-center">
-          <p className="text-slate-500 text-sm">
-            <span className="font-bold text-amber-700">老K溫馨提示：</span>到府看相或教學課程需另行評估議價，歡迎直接與我聯繫討論細節。
-          </p>
-        </div>
-      </section>
+    </section>
 
-      {/* Social & Contact Links - Clean & Minimal */}
-      <section className="py-20 px-6 bg-stone-50">
-        <div className="max-w-5xl mx-auto text-center">
-          <h3 className="text-lg font-bold text-slate-400 mb-10 uppercase tracking-[0.2em]">聯絡老K</h3>
-          <div className="flex flex-wrap justify-center gap-x-12 gap-y-8">
-            <a 
-              href="https://facebook.com/kfacehand" 
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 text-slate-500 hover:text-blue-600 transition-all font-semibold"
-            >
-              <Facebook size={24} /> Facebook
-            </a>
-            <a 
-              href="https://instagram.com/kfacehand" 
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 text-slate-500 hover:text-pink-600 transition-all font-semibold"
-            >
-              <Instagram size={24} /> Instagram
-            </a>
-            <a 
-              href="https://threads.net/@kfacehand" 
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 text-slate-500 hover:text-slate-900 transition-all font-semibold"
-            >
-              <MessageCircle size={24} /> Threads
-            </a>
-            <a 
-              href="mailto:k@kfacehand.com" 
-              className="flex items-center gap-2 text-slate-500 hover:text-amber-600 transition-all font-semibold"
-            >
-              <Mail size={24} /> k@kfacehand.com
-            </a>
-          </div>
-        </div>
-      </section>
+    <!-- Footer -->
+    <footer class="py-12 border-t border-stone-200 text-center text-slate-400 text-sm">
+        <p class="font-medium tracking-widest uppercase">K FACE & HAND</p>
+        <p class="mt-2 text-xs">© <span id="year"></span> 老K的命理實驗室 | 台南命理諮詢</p>
+    </footer>
 
-      {/* Footer */}
-      <footer className="py-12 border-t border-stone-200 text-center text-slate-400 text-sm">
-        <p className="font-medium tracking-wide tracking-widest uppercase">K FACE & HAND</p>
-        <p className="mt-2 text-xs">© {new Date().getFullYear()} 老K的命理實驗室 | 台南命理諮詢</p>
-      </footer>
-    </div>
-  );
-};
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
 
-export default App;
+        // Current Year for Footer
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // Navbar Scroll Logic
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('bg-white/80', 'backdrop-blur-md', 'shadow-sm', 'py-4');
+                navbar.classList.remove('bg-transparent', 'py-6');
+            } else {
+                navbar.classList.remove('bg-white/80', 'backdrop-blur-md', 'shadow-sm', 'py-4');
+                navbar.classList.add('bg-transparent', 'py-6');
+            }
+        });
+    </script>
+</body>
+</html>
