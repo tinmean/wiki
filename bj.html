@@ -149,7 +149,7 @@
             <h1 class="text-xl sm:text-2xl font-bold text-yellow-400 tracking-wider">BLACKJACK</h1>
             
             <div class="flex items-center gap-3 sm:gap-4">
-                <button onclick="toggleStats()" class="bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm px-3 py-2 rounded-lg transition flex items-center gap-2">
+                <button id="toggle-stats-btn" class="bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm px-3 py-2 rounded-lg transition flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z" />
                     </svg>
@@ -193,14 +193,14 @@
             <div id="betting-controls" class="flex flex-col items-center gap-4">
                 <div class="text-sm text-gray-300">請下注</div>
                 <div class="flex gap-4 mb-2 items-center">
-                    <button onclick="adjustBet(-10)" class="w-10 h-10 rounded-full bg-red-900/80 border border-red-500 flex items-center justify-center hover:bg-red-800 transition">-10</button>
+                    <button id="btn-bet-minus" class="w-10 h-10 rounded-full bg-red-900/80 border border-red-500 flex items-center justify-center hover:bg-red-800 transition">-10</button>
                     <div class="text-3xl font-bold font-mono w-24 text-center border-b-2 border-white/20" id="current-bet">100</div>
-                    <button onclick="adjustBet(10)" class="w-10 h-10 rounded-full bg-green-900/80 border border-green-500 flex items-center justify-center hover:bg-green-800 transition">+10</button>
+                    <button id="btn-bet-plus" class="w-10 h-10 rounded-full bg-green-900/80 border border-green-500 flex items-center justify-center hover:bg-green-800 transition">+10</button>
                 </div>
                 <button id="deal-btn" class="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-3 px-8 rounded-xl shadow-lg transform active:scale-95 transition-all text-lg uppercase tracking-wider">
                     發牌 (Deal)
                 </button>
-                <div class="text-xs text-white/40 mt-1 cursor-pointer hover:text-white/80" onclick="resetStats()">重置數據 & 籌碼</div>
+                <div id="reset-stats-btn" class="text-xs text-white/40 mt-1 cursor-pointer hover:text-white/80">重置數據 & 籌碼</div>
             </div>
 
             <!-- Phase 2: Actions -->
@@ -231,7 +231,7 @@
                 <h2 class="text-xl font-bold text-white flex items-center gap-2">
                     📊 歷史戰績
                 </h2>
-                <button onclick="toggleStats()" class="text-gray-400 hover:text-white">
+                <button id="close-stats-btn" class="text-gray-400 hover:text-white">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
@@ -299,6 +299,8 @@
         const statsModal = document.getElementById('stats-modal');
 
         // --- Initialization ---
+        // Bind events first to ensure they are ready
+        bindEvents();
         loadData();
         createDeck();
         shuffleDeck();
@@ -333,6 +335,7 @@
             let score = 0;
             let aces = 0;
             for (let card of hand) {
+                if (!card) continue; // Safety check
                 score += card.weight;
                 if (card.value === 'A') aces++;
             }
@@ -346,11 +349,29 @@
         // --- Storage & Stats Logic ---
 
         function loadData() {
-            const savedMoney = localStorage.getItem('bj_money');
-            const savedStats = localStorage.getItem('bj_stats');
-            
-            if (savedMoney) playerMoney = parseInt(savedMoney);
-            if (savedStats) stats = JSON.parse(savedStats);
+            try {
+                const savedMoney = localStorage.getItem('bj_money');
+                const savedStats = localStorage.getItem('bj_stats');
+                
+                if (savedMoney) {
+                    const parsedMoney = parseInt(savedMoney);
+                    if (!isNaN(parsedMoney)) playerMoney = parsedMoney;
+                }
+                
+                if (savedStats) {
+                    const parsedStats = JSON.parse(savedStats);
+                    if (parsedStats) {
+                        stats = { ...stats, ...parsedStats };
+                        // Ensure history array exists
+                        if (!Array.isArray(stats.history)) stats.history = [];
+                    }
+                }
+            } catch (e) {
+                console.error("Data load error:", e);
+                // Reset if data is corrupt
+                localStorage.removeItem('bj_money');
+                localStorage.removeItem('bj_stats');
+            }
         }
 
         function saveData() {
@@ -365,6 +386,9 @@
             if (result === 'win') stats.wins++;
             else if (result === 'lose') stats.losses++;
             else stats.pushes++;
+
+            // Ensure history exists before unshift
+            if (!stats.history) stats.history = [];
 
             // Add to history (keep max 50)
             stats.history.unshift({
@@ -387,7 +411,7 @@
                 saveData();
                 updateUI();
                 renderStatsContent();
-                alert("已重置！");
+                // alert("已重置！"); // Removed alert to avoid interruptions
             }
         }
 
@@ -395,12 +419,18 @@
 
         function createCardElement(card, isHidden = false) {
             const div = document.createElement('div');
-            div.className = `playing-card animate-deal ${isHidden ? 'hidden-card' : (card.suit === '♥' || card.suit === '♦' ? 'red' : 'black')}`;
-            if (!isHidden) {
+            // Safety check for undefined card
+            const suit = card ? card.suit : '';
+            const value = card ? card.value : '';
+            const isRed = suit === '♥' || suit === '♦';
+            
+            div.className = `playing-card animate-deal ${isHidden ? 'hidden-card' : (isRed ? 'red' : 'black')}`;
+            
+            if (!isHidden && card) {
                 div.innerHTML = `
-                    <div class="card-top"><span class="card-value">${card.value}</span><span class="card-suit">${card.suit}</span></div>
-                    <div class="card-center">${card.suit}</div>
-                    <div class="card-bottom"><span class="card-value">${card.value}</span><span class="card-suit">${card.suit}</span></div>
+                    <div class="card-top"><span class="card-value">${value}</span><span class="card-suit">${suit}</span></div>
+                    <div class="card-center">${suit}</div>
+                    <div class="card-bottom"><span class="card-value">${value}</span><span class="card-suit">${suit}</span></div>
                 `;
             }
             return div;
@@ -409,10 +439,12 @@
         function renderHands(showHidden = false) {
             playerHandEl.innerHTML = '';
             dealerHandEl.innerHTML = '';
-            playerHand.forEach(card => playerHandEl.appendChild(createCardElement(card)));
+            playerHand.forEach(card => {
+                if(card) playerHandEl.appendChild(createCardElement(card));
+            });
             dealerHand.forEach((card, index) => {
                 const isHidden = index === 0 && !showHidden;
-                dealerHandEl.appendChild(createCardElement(card, isHidden));
+                if(card) dealerHandEl.appendChild(createCardElement(card, isHidden));
             });
             playerScoreEl.innerText = calculateScore(playerHand);
             dealerScoreEl.innerText = showHidden ? calculateScore(dealerHand) : "?";
@@ -441,24 +473,4 @@
         function renderStatsContent() {
             document.getElementById('stat-total-games').innerText = stats.totalGames;
             
-            const winRate = stats.totalGames === 0 ? 0 : Math.round((stats.wins / stats.totalGames) * 100);
-            document.getElementById('stat-win-rate').innerText = `${winRate}%`;
-            
-            const netEl = document.getElementById('stat-net-earnings');
-            netEl.innerText = (stats.netEarnings >= 0 ? '+' : '') + `$${stats.netEarnings}`;
-            netEl.className = `text-2xl font-bold ${stats.netEarnings >= 0 ? 'text-green-400' : 'text-red-400'}`;
-
-            const list = document.getElementById('history-list');
-            list.innerHTML = '';
-            
-            if (stats.history.length === 0) {
-                list.innerHTML = '<div class="text-center text-gray-500 py-4 text-sm">尚無紀錄，快去玩一場吧！</div>';
-                return;
-            }
-
-            stats.history.forEach(item => {
-                const div = document.createElement('div');
-                let resultText = item.result === 'win' ? '勝利' : (item.result === 'lose' ? '敗北' : '平手');
-                let colorClass = item.result === 'win' ? 'history-win' : (item.result === 'lose' ? 'history-lose' : 'history-push');
-                let amountSign = item.amount > 0 ? '+' : '';
-                let amountClass = item.amount > 0 ? 'text-green-400' : (item.amount < 0 ? 'text-re
+            const winRate = stats.totalGames === 0 ? 0 : Math.round((sta
