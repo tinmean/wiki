@@ -473,4 +473,215 @@
         function renderStatsContent() {
             document.getElementById('stat-total-games').innerText = stats.totalGames;
             
-            const winRate = stats.totalGames === 0 ? 0 : Math.round((sta
+            const winRate = stats.totalGames === 0 ? 0 : Math.round((stats.wins / stats.totalGames) * 100);
+            document.getElementById('stat-win-rate').innerText = `${winRate}%`;
+            
+            const netEl = document.getElementById('stat-net-earnings');
+            netEl.innerText = (stats.netEarnings >= 0 ? '+' : '') + `$${stats.netEarnings}`;
+            netEl.className = `text-2xl font-bold ${stats.netEarnings >= 0 ? 'text-green-400' : 'text-red-400'}`;
+
+            const list = document.getElementById('history-list');
+            list.innerHTML = '';
+            
+            if (stats.history.length === 0) {
+                list.innerHTML = '<div class="text-center text-gray-500 py-4 text-sm">尚無紀錄，快去玩一場吧！</div>';
+                return;
+            }
+
+            stats.history.forEach(item => {
+                const div = document.createElement('div');
+                let resultText = item.result === 'win' ? '勝利' : (item.result === 'lose' ? '敗北' : '平手');
+                let colorClass = item.result === 'win' ? 'history-win' : (item.result === 'lose' ? 'history-lose' : 'history-push');
+                let amountSign = item.amount > 0 ? '+' : '';
+                let amountClass = item.amount > 0 ? 'text-green-400' : (item.amount < 0 ? 'text-red-400' : 'text-gray-400');
+
+                div.className = `flex justify-between items-center p-3 rounded bg-gray-700/30 ${colorClass} text-sm history-item`;
+                div.innerHTML = `
+                    <div class="flex flex-col">
+                        <span class="font-bold text-gray-200">${resultText}</span>
+                        <span class="text-xs text-gray-500">我: ${item.pScore} / 莊: ${item.dScore}</span>
+                    </div>
+                    <div class="font-mono font-bold ${amountClass}">
+                        ${amountSign}$${item.amount}
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        // --- Game Actions ---
+
+        function adjustBet(amount) {
+            if (currentBet + amount >= 10 && currentBet + amount <= playerMoney) {
+                currentBet += amount;
+                updateUI();
+            }
+        }
+
+        function setGameState(state) {
+            gameState = state;
+            bettingControls.classList.add('hidden');
+            actionControls.classList.add('hidden');
+            restartControls.classList.add('hidden');
+
+            if (state === 'betting') {
+                bettingControls.classList.remove('hidden');
+                playerHandEl.innerHTML = '<div class="w-24 h-32 border-2 border-white/10 rounded-lg flex items-center justify-center text-white/20 text-sm">等待發牌</div>';
+                dealerHandEl.innerHTML = '<div class="w-24 h-32 border-2 border-white/10 rounded-lg flex items-center justify-center text-white/20 text-sm">等待發牌</div>';
+                playerScoreEl.innerText = '0';
+                dealerScoreEl.innerText = '?';
+                messageArea.style.opacity = '0';
+                if (playerMoney < 10) {
+                    alert("籌碼耗盡！已為您補充 $500 救濟金。");
+                    playerMoney += 500;
+                    saveData();
+                    updateUI();
+                }
+            } else if (state === 'playing') {
+                actionControls.classList.remove('hidden');
+                actionControls.classList.add('flex');
+            } else if (state === 'finished') {
+                restartControls.classList.remove('hidden');
+            }
+        }
+
+        function startGame() {
+            if (playerMoney < currentBet) {
+                // Using a non-blocking UI message instead of alert if possible, or simple return
+                showMessage("籌碼不足！", "lose");
+                return;
+            }
+            
+            if (deck.length < 15) {
+                createDeck();
+                shuffleDeck();
+                showMessage("洗牌中...", "neutral");
+            }
+
+            playerMoney -= currentBet;
+            
+            // Deal cards
+            const p1 = getCard();
+            const d1 = getCard();
+            const p2 = getCard();
+            const d2 = getCard();
+            
+            // Safety check if deck failed
+            if (!p1 || !d1 || !p2 || !d2) {
+                createDeck();
+                shuffleDeck();
+                return startGame(); // Retry once
+            }
+
+            playerHand = [p1, p2];
+            dealerHand = [d1, d2];
+            
+            updateUI();
+            renderHands(false);
+            setGameState('playing');
+
+            if (calculateScore(playerHand) === 21) endRound();
+        }
+
+        function hit() {
+            playerHand.push(getCard());
+            renderHands(false);
+            if (calculateScore(playerHand) > 21) {
+                showMessage("爆牌了！ (Bust)", "lose");
+                endRound();
+            } else if (calculateScore(playerHand) === 21) {
+                setTimeout(stand, 300);
+            }
+        }
+
+        function stand() {
+            renderHands(true);
+            let dealerScore = calculateScore(dealerHand);
+            
+            const dealerLoop = setInterval(() => {
+                if (dealerScore < 17) {
+                    dealerHand.push(getCard());
+                    dealerScore = calculateScore(dealerHand);
+                    renderHands(true);
+                } else {
+                    clearInterval(dealerLoop);
+                    determineWinner();
+                }
+            }, 600);
+        }
+
+        function endRound() {
+            if (calculateScore(playerHand) > 21) {
+                renderHands(true);
+                determineWinner();
+            } else {
+                stand();
+            }
+        }
+
+        function determineWinner() {
+            const pScore = calculateScore(playerHand);
+            const dScore = calculateScore(dealerHand);
+            let result = "";
+            let netAmount = -currentBet; // Default loss (bet already deducted)
+            let resultType = "lose";
+
+            if (pScore > 21) {
+                result = "你爆牌了，莊家獲勝！";
+            } else if (dScore > 21) {
+                result = "莊家爆牌，你贏了！";
+                netAmount = currentBet; // Win 1x bet (plus original bet back is implicit in wallet math, net profit is 1x)
+                playerMoney += currentBet * 2;
+                resultType = "win";
+            } else if (pScore > dScore) {
+                if (pScore === 21 && playerHand.length === 2) {
+                     result = "Blackjack! 獎金加倍！";
+                     let bonusWin = Math.ceil(currentBet * 1.5);
+                     netAmount = bonusWin;
+                     playerMoney += currentBet + bonusWin;
+                } else {
+                     result = "點數較大，你贏了！";
+                     netAmount = currentBet;
+                     playerMoney += currentBet * 2;
+                }
+                resultType = "win";
+            } else if (pScore < dScore) {
+                result = "莊家點數較大，你輸了！";
+            } else {
+                result = "平手 (Push)，退回注碼。";
+                netAmount = 0;
+                playerMoney += currentBet;
+                resultType = "push";
+            }
+
+            resultText.innerText = result;
+            resultText.className = `text-2xl sm:text-3xl font-bold mb-4 drop-shadow-md text-center ${resultType === 'win' ? 'text-yellow-400' : (resultType === 'lose' ? 'text-red-400' : 'text-gray-300')}`;
+            
+            recordGame(resultType, netAmount, pScore, dScore);
+            updateUI();
+            setGameState('finished');
+        }
+
+        // --- Event Listeners ---
+        function bindEvents() {
+            document.getElementById('deal-btn').addEventListener('click', startGame);
+            document.getElementById('hit-btn').addEventListener('click', hit);
+            document.getElementById('stand-btn').addEventListener('click', stand);
+            document.getElementById('restart-btn').addEventListener('click', () => setGameState('betting'));
+            
+            // New Listeners (replacing onclick)
+            document.getElementById('btn-bet-minus').addEventListener('click', () => adjustBet(-10));
+            document.getElementById('btn-bet-plus').addEventListener('click', () => adjustBet(10));
+            document.getElementById('reset-stats-btn').addEventListener('click', resetStats);
+            document.getElementById('toggle-stats-btn').addEventListener('click', toggleStats);
+            document.getElementById('close-stats-btn').addEventListener('click', toggleStats);
+            
+            // Close modal when clicking outside
+            statsModal.addEventListener('click', (e) => {
+                if (e.target === statsModal) toggleStats();
+            });
+        }
+
+    </script>
+</body>
+</html>
