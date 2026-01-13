@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>老K靈龜占卜</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Serif TC', serif;
+            background-color: #f3ebd7; /* Parchment color */
+            background-image: radial-gradient(#d1c4a9 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .coin {
+            transition: transform 0.5s;
+            transform-style: preserve-3d;
+        }
+        .coin.flipping {
+            animation: flip 0.6s infinite linear;
+        }
+        @keyframes flip {
+            0% { transform: rotateY(0deg) rotateX(0deg); }
+            100% { transform: rotateY(360deg) rotateX(360deg); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Custom scrollbar for mobile niceness */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #8c7b64;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- Data & Logic Helpers ---
+
+        // Trigram data (Binary: 1=Yang, 0=Yin)
+        const TRIGRAMS = {
+            '111': { name: '乾', nature: '天' },
+            '011': { name: '兌', nature: '澤' },
+            '101': { name: '離', nature: '火' },
+            '001': { name: '震', nature: '雷' },
+            '110': { name: '巽', nature: '風' },
+            '010': { name: '坎', nature: '水' },
+            '100': { name: '艮', nature: '山' },
+            '000': { name: '坤', nature: '地' }
+        };
+
+        // Simplified Hexagram lookup (Key: UpperTrigramBin + LowerTrigramBin)
+        const HEXAGRAM_DATA = {
+            "111111": { name: "乾", title: "乾為天", desc: "元亨利貞。剛健中正，天行剛健。" },
+            "000000": { name: "坤", title: "坤為地", desc: "元亨利牝馬之貞。厚德載物，柔順伸展。" },
+            "010000": { name: "屯", title: "水雷屯", desc: "元亨利貞。萬物始生，充滿艱難。" },
+            "100010": { name: "蒙", title: "山水蒙", desc: "亨。匪我求童蒙，童蒙求我。啟蒙智慧。" },
+            "010111": { name: "需", title: "水天需", desc: "有孚，光亨，貞吉。等待時機，飲食宴樂。" },
+            "111010": { name: "訟", title: "天水訟", desc: "有孚，窒惕，中吉。爭執訴訟，慎之又慎。" },
+            "000010": { name: "師", title: "地水師", desc: "貞，丈人吉，無咎。行軍用師，嚴正以待。" },
+            "010000": { name: "比", title: "水地比", desc: "吉。原筮，元永貞，無咎。親密比輔，和樂相處。" },
+            "110111": { name: "小畜", title: "風天小畜", desc: "亨。密雲不雨，自我西郊。積蓄力量，稍作停留。" },
+            "111011": { name: "履", title: "天澤履", desc: "履虎尾，不咥人，亨。如履薄冰，行禮有儀。" },
+            "000111": { name: "泰", title: "地天泰", desc: "小往大來，吉亨。天地交泰，萬物通順。" },
+            "111000": { name: "否", title: "天地否", desc: "否之匪人，不利君子貞。天地不交，閉塞不通。" },
+            "111101": { name: "同人", title: "天火同人", desc: "同人于野，亨。與人和同，光明磊落。" },
+            "101111": { name: "大有", title: "火天大有", desc: "元亨。盛大豐有，順天依時。" },
+            "000100": { name: "謙", title: "地山謙", desc: "亨，君子有終。謙虛受益，滿招損。" },
+            "001000": { name: "豫", title: "雷地豫", desc: "利建侯行師。安樂和悅，順時而動。" },
+            "011001": { name: "隨", title: "澤雷隨", desc: "元亨利貞，無咎。隨順時勢，隨遇而安。" },
+            "100110": { name: "蠱", title: "山風蠱", desc: "元亨，利涉大川。整頓治理，撥亂反正。" },
+            "000011": { name: "臨", title: "地澤臨", desc: "元亨利貞，至于八月有凶。親臨督導，教化人民。" },
+            "110000": { name: "觀", title: "風地觀", desc: "盥而不薦，有孚顒若。觀察瞻仰，神道設教。" },
+            "101001": { name: "噬嗑", title: "火雷噬嗑", desc: "亨，利用獄。咬合咀嚼，刑罰治理。" },
+            "100101": { name: "賁", title: "山火賁", desc: "亨，小利有攸往。文飾美化，文明以止。" },
+            "000100": { name: "剝", title: "山地剝", desc: "不利有攸往。剝落侵蝕，順勢而止。" },
+            "001000": { name: "復", title: "地雷復", desc: "亨。出入無疾，朋來無咎。一陽來復，萬物再生。" },
+            "111001": { name: "無妄", title: "天雷無妄", desc: "元亨利貞。真實無妄，順乎自然。" },
+            "100111": { name: "大畜", title: "山天大畜", desc: "利貞。不家食吉，利涉大川。剛健篤實，積蓄養德。" },
+            "001100": { name: "頤", title: "山雷頤", desc: "貞吉。觀頤，自求口實。頤養身心，言語謹慎。" },
+            "011110": { name: "大過", title: "澤風大過", desc: "棟橈，利有攸往，亨。非常時期，行非常事。" },
+            "010010": { name: "坎", title: "坎為水", desc: "習坎，有孚，維心亨。重重險難，誠信行事。" },
+            "101101": { name: "離", title: "離為火", desc: "利貞，亨。附麗光明，柔順中正。" },
+            "011100": { name: "咸", title: "澤山咸", desc: "亨，利貞，取女吉。感應溝通，心心相印。" },
+            "001110": { name: "恆", title: "雷風恆", desc: "亨，無咎，利貞。恆久不已，持之以恆。" },
+            "111100": { name: "遯", title: "天山遯", desc: "亨，小利貞。退避隱居，遠離小人。" },
+            "001111": { name: "大壯", title: "雷天大壯", desc: "利貞。壯大隆盛，非禮弗履。" },
+            "101000": { name: "晉", title: "火地晉", desc: "康侯用錫馬蕃庶，晝日三接。晉升前進，旭日東昇。" },
+            "000101": { name: "明夷", title: "地火明夷", desc: "利艱貞。光明受損，韜光養晦。" },
+            "110101": { name: "家人", title: "風火家人", desc: "利女貞。誠信治家，家道正則天下定。" },
+            "101011": { name: "睽", title: "火澤睽", desc: "小事吉。背離乖異，求同存異。" },
+            "010100": { name: "蹇", title: "水山蹇", desc: "利西南，不利東北。艱難險阻，反身修德。" },
+            "001010": { name: "解", title: "雷水解", desc: "利西南。緩解困難，赦過宥罪。" },
+            "100011": { name: "損", title: "山澤損", desc: "有孚，元吉，無咎。損下益上，懲忿窒欲。" },
+            "110001": { name: "益", title: "風雷益", desc: "利有攸往，利涉大川。損上益下，見善則遷。" },
+            "011111": { name: "夬", title: "澤天夬", desc: "揚于王庭，孚號有厲。決斷小人，剛決柔也。" },
+            "111110": { name: "姤", title: "天風姤", desc: "女壯，勿用取女。陰陽相遇，不期而遇。" },
+            "011000": { name: "萃", title: "澤地萃", desc: "亨，王假有廟。聚集精英，修除兵器。" },
+            "000110": { name: "升", title: "地風升", desc: "元亨，用見大人。積小成大，順勢而升。" },
+            "011010": { name: "困", title: "澤水困", desc: "亨，貞，大人吉。身處困境，致命遂志。" },
+            "010110": { name: "井", title: "水風井", desc: "改邑不改井。養人無窮，井德之義。" },
+            "011101": { name: "革", title: "澤火革", desc: "己日乃孚，元亨利貞。變革天命，順天應人。" },
+            "101110": { name: "鼎", title: "火風鼎", desc: "元吉，亨。穩重圖變，去舊取新。" },
+            "001001": { name: "震", title: "震為雷", desc: "亨。震來虩虩，笑言啞啞。恐懼修省，震動驚醒。" },
+            "100100": { name: "艮", title: "艮為山", desc: "艮其背，不獲其身。抑止靜止，動靜失時。" },
+            "110100": { name: "漸", title: "風山漸", desc: "女歸吉，利貞。循序漸進，積少成多。" },
+            "001011": { name: "歸妹", title: "雷澤歸妹", desc: "征凶，無攸利。少女急嫁，不循正道。" },
+            "001101": { name: "豐", title: "雷火豐", desc: "亨，王假之。豐大光明，日中則昃。" },
+            "101100": { name: "旅", title: "火山旅", desc: "小亨，旅貞吉。羈旅漂泊，守正為安。" },
+            "110110": { name: "巽", title: "巽為風", desc: "小亨，利有攸往。謙遜順從，無孔不入。" },
+            "011011": { name: "兌", title: "兌為澤", desc: "亨，利貞。喜悅溝通，朋友講習。" },
+            "110010": { name: "渙", title: "風水渙", desc: "亨，王假有廟。離散化解，乘木有功。" },
+            "010011": { name: "節", title: "水澤節", desc: "亨，苦節不可貞。節制節約，適可而止。" },
+            "110011": { name: "中孚", title: "風澤中孚", desc: "豚魚吉，利涉大川。誠信感通，心存誠信。" },
+            "001101": { name: "小過", title: "雷山小過", desc: "亨，利貞。小有過越，行下而順。" },
+            "010101": { name: "既濟", title: "水火既濟", desc: "亨小，利貞。初吉終亂。事情完成，居安思危。" },
+            "101010": { name: "未濟", title: "火水未濟", desc: "亨，小狐汔濟。事情未成，充滿希望。" }
+        };
+
+        const Coin = ({ value, isFlipping }) => {
+            // value: 2 (Tail/Yin/Manchu), 3 (Head/Yang/Chinese)
+            const isHead = value === 3;
+            
+            return (
+                <div className={`coin w-24 h-24 mx-2 relative flex items-center justify-center ${isFlipping ? 'flipping' : ''}`}>
+                   {/* We use an SVG for the coin visual */}
+                   <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-xl">
+                        <defs>
+                            <linearGradient id="brass" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stopColor="#f3db75" />
+                                <stop offset="50%" stopColor="#dcb348" />
+                                <stop offset="100%" stopColor="#b88a2d" />
+                            </linearGradient>
+                        </defs>
+                        
+                        {/* Coin Body */}
+                        <circle cx="50" cy="50" r="48" fill="url(#brass)" stroke="#8c7035" strokeWidth="2" />
+                        <circle cx="50" cy="50" r="42" fill="none" stroke="#8c7035" strokeWidth="1" opacity="0.6" />
+                        
+                        {/* Center Hole (Square) - Filled with dark to simulate hole */}
+                        <rect x="36" y="36" width="28" height="28" fill="#292524" stroke="#8c7035" strokeWidth="2" />
+
+                        {isHead ? (
+                            <g className="font-serif font-bold fill-yellow-950" style={{ fontSize: '18px', textAnchor: 'middle', pointerEvents: 'none', fontFamily: '"Noto Serif TC", serif' }}>
+                                {/* Top: Qian */}
+                                <text x="50" y="28">乾</text>
+                                {/* Bottom: Long */}
+                                <text x="50" y="86">隆</text>
+                                {/* Right: Tong */}
+                                <text x="82" y="57">通</text>
+                                {/* Left: Bao */}
+                                <text x="18" y="57">寶</text>
+                            </g>
+                        ) : (
+                            // Simulated Manchu (Tail/Yin)
+                            <g stroke="#5c4033" strokeWidth="2.5" fill="none" strokeLinecap="round" opacity="0.8">
+                                {/* Left: Boo (Mint) */}
+                                <path d="M 25 35 Q 18 35 18 42 Q 18 48 25 48 Q 18 48 18 55 Q 18 62 25 62 L 25 70" />
+                                <path d="M 20 52 L 28 52" />
+                                
+                                {/* Right: Ciowan (Revenue) */}
+                                <path d="M 75 30 L 75 72" />
+                                <path d="M 75 38 L 82 42" />
+                                <path d="M 75 50 L 82 54" />
+                                <path d="M 75 62 L 68 66" />
+                            </g>
+                        )}
+                   </svg>
+                </div>
+            );
+        };
+
+        const GuaLine = ({ type, isMoving, index, animate }) => {
+            // type: 6 (Old Yin), 7 (Yang), 8 (Yin), 9 (Old Yang)
+            // Yin: 6, 8 (Broken)
+            // Yang: 7, 9 (Solid)
+            const isYang = type === 7 || type === 9;
+            const isOld = type === 6 || type === 9;
+
+            return (
+                <div className={`flex items-center w-full max-w-xs h-10 my-1 ${animate ? 'fade-in' : ''}`}>
+                   {/* Left Label - Fixed width, no longer absolute */}
+                   <div className="text-xs text-gray-500 font-serif w-10 flex-shrink-0 text-left">
+                       {index === 0 ? "初爻" : index === 5 ? "上爻" : (index + 1) + "爻"}
+                   </div>
+                   
+                   {/* Center Line - Flex grow to fill available space */}
+                   <div className="flex-1 flex items-center justify-center cursor-pointer hover:bg-black/5 rounded transition-colors px-1 mx-2">
+                        {isYang ? (
+                            <div className="w-full h-4 bg-gray-800 rounded relative flex items-center justify-center">
+                                {isOld && <div className="w-3 h-3 bg-red-500 rounded-full absolute animate-pulse"></div>}
+                            </div>
+                        ) : (
+                            <div className="w-full flex justify-between gap-4">
+                                <div className="h-4 flex-1 bg-gray-800 rounded"></div>
+                                <div className="h-4 flex-1 bg-gray-800 rounded relative flex items-center justify-center">
+                                     {isOld && <div className="absolute text-red-500 font-bold text-lg">✕</div>}
+                                </div>
+                            </div>
+                        )}
+                   </div>
+                   
+                   {/* Right Label - Fixed width, no longer absolute */}
+                   <div className="text-xs w-20 flex-shrink-0 text-right text-gray-600 whitespace-nowrap">
+                        {type === 6 && "老陰 → 陽"}
+                        {type === 9 && "老陽 → 陰"}
+                        {type === 7 && "少陽"}
+                        {type === 8 && "少陰"}
+                   </div>
+                </div>
+            );
+        };
+
+        const HexagramDisplay = ({ lines, title, label }) => {
+            // lines is array of 0 (Yin) or 1 (Yang) from bottom to top
+            // Need to reverse for display (Top line at top)
+            const displayLines = [...lines].reverse();
+
+            // Calculate lookup key
+            const upperBin = displayLines.slice(0, 3).join('');
+            const lowerBin = displayLines.slice(3, 6).join('');
+            const key = upperBin + lowerBin;
+            const info = HEXAGRAM_DATA[key] || { name: "?", title: "未知", desc: "..." };
+
+            return (
+                <div className="bg-white/60 p-6 rounded-lg shadow-md border border-stone-300 flex flex-col items-center w-full max-w-sm">
+                    <h3 className="text-xl font-bold text-stone-800 mb-2">{label}：{info.title}</h3>
+                    <div className="flex flex-col gap-1.5 w-32 mb-4">
+                        {displayLines.map((val, i) => (
+                            <div key={i} className="flex gap-2 h-3 w-full">
+                                {val === 1 ? (
+                                    <div className="w-full bg-stone-800 rounded-sm"></div>
+                                ) : (
+                                    <>
+                                        <div className="w-[45%] bg-stone-800 rounded-sm"></div>
+                                        <div className="w-[10%]"></div>
+                                        <div className="w-[45%] bg-stone-800 rounded-sm"></div>
+                                    </>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                    <div className="text-center">
+                        <p className="text-stone-600 text-sm leading-relaxed">{info.desc}</p>
+                    </div>
+                </div>
+            );
+        };
+
+        function App() {
+            const [step, setStep] = useState(0); // 0: Start, 1: Casting, 2: Result
+            const [lines, setLines] = useState([]); // Array of sums (6,7,8,9)
+            const [currentCoins, setCurrentCoins] = useState([3, 3, 3]);
+            const [isFlipping, setIsFlipping] = useState(false);
+            const scrollRef = useRef(null);
+
+            // Audio context for vibration only (browsers block auto audio)
+            const vibrate = () => {
+                if (navigator.vibrate) navigator.vibrate(200);
+            };
+
+            const cast = () => {
+                if (lines.length >= 6) return;
+                setIsFlipping(true);
+
+                // Delay to simulate animation
+                setTimeout(() => {
+                    // Logic: Head=3, Tail=2
+                    // Probabilities based on real coins:
+                    // Each coin 50/50.
+                    const c1 = Math.random() < 0.5 ? 2 : 3;
+                    const c2 = Math.random() < 0.5 ? 2 : 3;
+                    const c3 = Math.random() < 0.5 ? 2 : 3;
+                    const sum = c1 + c2 + c3;
+                    
+                    setCurrentCoins([c1, c2, c3]);
+                    setLines(prev => [...prev, sum]);
+                    setIsFlipping(false);
+                    vibrate();
+                }, 1000);
+            };
+
+            const reset = () => {
+                setLines([]);
+                setStep(0);
+                setCurrentCoins([3, 3, 3]);
+            };
+
+            useEffect(() => {
+                if (lines.length === 6) {
+                    setTimeout(() => setStep(2), 1000);
+                }
+            }, [lines]);
+
+            // Calculate results
+            // Original Hexagram (Ben Gua): 6->0, 7->1, 8->0, 9->1
+            // Transformed Hexagram (Zhi Gua): 6->1, 7->1, 8->0, 9->0
+            
+            // Note: 6 is Old Yin (Yin changing to Yang). In Ben Gua it is Yin (0). In Zhi Gua it is Yang (1).
+            // 9 is Old Yang (Yang changing to Yin). In Ben Gua it is Yang (1). In Zhi Gua it is Yin (0).
+            
+            const getBenGuaBits = () => lines.map(val => (val % 2 === 0 ? 0 : 1)); // Even (6,8)=0, Odd(7,9)=1
+            const getZhiGuaBits = () => lines.map(val => {
+                if (val === 6) return 1; // Old Yin -> Yang
+                if (val === 9) return 0; // Old Yang -> Yin
+                return val % 2 === 0 ? 0 : 1; // Static
+            });
+
+            const hasMovingLines = lines.some(l => l === 6 || l === 9);
+
+            return (
+                <div className="min-h-screen flex flex-col items-center py-8 px-4 max-w-md mx-auto relative overflow-hidden">
+                    
+                    {/* Background decoration */}
+                    <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none z-0 flex items-center justify-center">
+                        <div className="w-[80vw] h-[80vw] border-[20px] border-stone-800 rounded-full flex items-center justify-center">
+                             <div className="text-[40vw] font-serif text-stone-800">卦</div>
+                        </div>
+                    </div>
+
+                    <header className="z-10 text-center mb-8">
+                        <h1 className="text-4xl font-bold text-stone-800 tracking-widest mb-2" style={{textShadow: '2px 2px 0px rgba(0,0,0,0.1)'}}>老K靈龜占卜</h1>
+                        <p className="text-stone-600 italic text-sm mb-4">誠心默念所求之事，投擲六次成卦</p>
+                        
+                        <div className="flex flex-col gap-1 text-sm font-serif">
+                            <a href="https://kfacehand.com" target="_blank" rel="noopener noreferrer" className="text-stone-700 hover:text-red-900 transition-colors underline decoration-stone-400/50 underline-offset-2">
+                                老K網站 kfacehand.com
+                            </a>
+                            <a href="https://facebook.com/kfacehand" target="_blank" rel="noopener noreferrer" className="text-stone-700 hover:text-blue-900 transition-colors underline decoration-stone-400/50 underline-offset-2">
+                                老K手面相臉書 facebook.com/kfacehand
+                            </a>
+                        </div>
+                    </header>
+
+                    {step < 2 && (
+                        <div className="z-10 w-full flex flex-col items-center">
+                            
+                            {/* Turtle Shell Area (Abstract) */}
+                            <div className="bg-stone-800 w-full max-w-[340px] h-48 rounded-[3rem] mb-8 relative shadow-2xl flex items-center justify-center border-b-8 border-stone-900 px-2">
+                                {/* Texture */}
+                                <div className="absolute w-full h-full opacity-20 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgdmlld0JveD0iMCAwIDIwIDIwIiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMSI+PHBhdGggZD0iTTEwIDB2MjBNMCAxMGgyMCIgb3BhY2l0eT0iMC41Ii8+PC9zdmc+')]"></div>
+                                
+                                <div className="flex justify-center items-center z-10 w-full">
+                                    {currentCoins.map((val, idx) => (
+                                        <Coin key={idx} value={val} isFlipping={isFlipping} />
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Controls */}
+                            <button 
+                                onClick={cast} 
+                                disabled={isFlipping || lines.length >= 6}
+                                className={`
+                                    bg-gradient-to-b from-red-800 to-red-900 text-amber-50 
+                                    text-xl font-bold py-4 px-12 rounded-full shadow-lg 
+                                    transform transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed
+                                    border-2 border-red-950 mb-8
+                                `}
+                            >
+                                {isFlipping ? "占卜中..." : lines.length === 6 ? "卦象已成" : `擲爻 (${lines.length + 1}/6)`}
+                            </button>
+
+                            {/* Live Building of Hexagram */}
+                            <div className="w-full max-w-xs bg-white/50 rounded-lg p-4 min-h-[300px] flex flex-col-reverse justify-start border border-stone-300 shadow-inner">
+                                {lines.length === 0 && (
+                                    <div className="h-full flex items-center justify-center text-stone-400 text-sm">
+                                        卦象將由此處由下而上生成
+                                    </div>
+                                )}
+                                {lines.map((val, idx) => (
+                                    <GuaLine key={idx} type={val} index={idx} isMoving={val === 6 || val === 9} animate={true} />
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {step === 2 && (
+                        <div className="z-10 w-full flex flex-col items-center animate-fadeIn pb-12">
+                            <h2 className="text-2xl font-bold text-stone-800 mb-6 border-b-2 border-stone-800 pb-2">占卜結果</h2>
+                            
+                            <div className="flex flex-col gap-6 w-full items-center">
+                                {/* Main Hexagram */}
+                                <HexagramDisplay 
+                                    lines={getBenGuaBits()} 
+                                    title="本卦" 
+                                    label="主卦" 
+                                />
+
+                                {/* Moving Lines Explanation */}
+                                {hasMovingLines && (
+                                    <div className="w-full max-w-sm bg-amber-50 p-4 rounded border border-amber-200 text-amber-900 text-sm">
+                                        <h4 className="font-bold mb-2">變爻（動爻）：</h4>
+                                        <ul className="list-disc pl-5 space-y-1">
+                                            {lines.map((val, idx) => {
+                                                if (val === 6) return <li key={idx}>第{idx + 1}爻：老陰變少陽（陰極陽生）</li>;
+                                                if (val === 9) return <li key={idx}>第{idx + 1}爻：老陽變少陰（陽極陰生）</li>;
+                                                return null;
+                                            })}
+                                        </ul>
+                                    </div>
+                                )}
+
+                                {/* Transformed Hexagram */}
+                                {hasMovingLines ? (
+                                    <HexagramDisplay 
+                                        lines={getZhiGuaBits()} 
+                                        title="之卦" 
+                                        label="之卦" 
+                                    />
+                                ) : (
+                                    <div className="text-stone-500 text-sm p-4 bg-stone-100 rounded">
+                                        六爻安靜，無變爻。請以本卦卦辭為主。
+                                    </div>
+                                )}
+
+                                <button 
+                                    onClick={reset}
+                                    className="mt-8 text-stone-600 underline hover:text-stone-900"
+                                >
+                                    重新占卜
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
