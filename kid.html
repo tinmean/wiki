@@ -23,8 +23,10 @@
             margin: 0;
             padding: 20px;
             display: flex;
-            justify-content: center;
+            flex-direction: column; /* Stack vertically: Controls then Sheet */
+            align-items: center;    /* Center horizontally */
             color: var(--text-color);
+            min-height: 100vh;
         }
 
         /* A4 Paper Layout */
@@ -194,6 +196,7 @@
             body {
                 background-color: white;
                 padding: 0;
+                display: block; /* Reset flex display for print */
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
@@ -204,22 +207,24 @@
                 margin: 0;
             }
             .no-print {
-                display: none;
+                display: none !important;
             }
             input[type="text"] {
                 border-bottom: 2px solid #ccc;
             }
         }
 
-        /* Controls for screen only */
+        /* Controls for screen only - REARRANGED */
         .controls {
-            position: fixed;
-            top: 20px;
-            right: 20px;
+            /* Changed from fixed to static flow */
             display: flex;
-            flex-direction: column;
-            gap: 10px;
-            z-index: 100;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            width: 100%;
+            flex-wrap: wrap;
         }
         
         button {
@@ -232,6 +237,7 @@
             font-size: 14px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             font-weight: bold;
+            white-space: nowrap;
         }
         
         button:hover {
@@ -239,13 +245,12 @@
         }
 
         .print-tip {
-            font-size: 12px;
-            color: #666;
-            background: rgba(255,255,255,0.9);
-            padding: 8px;
+            font-size: 14px;
+            color: #555;
+            background: rgba(255,255,255,0.6);
+            padding: 8px 12px;
             border-radius: 4px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            max-width: 150px;
+            border: 1px solid #ddd;
         }
     </style>
 </head>
@@ -255,7 +260,7 @@
         <button onclick="printPage()">🖨️ 列印表格</button>
         <button onclick="clearInputs()" style="background-color: #e74c3c;">🗑️ 清除內容</button>
         <div class="print-tip">
-            💡 提示：如果按鈕沒反應，請按鍵盤 <b>Ctrl+P</b> (Windows) 或 <b>Cmd+P</b> (Mac) 直接列印。
+            💡 提示：如果按鈕沒反應，請按 <b>Ctrl+P</b> (Win) 或 <b>Cmd+P</b> (Mac)
         </div>
     </div>
 
