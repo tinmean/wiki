@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>成長挑戰卡</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
+
+        :root {
+            --primary-color: #2a9d8f; /* Teal - Calming & Growth */
+            --accent-color: #e9c46a;  /* Sand/Gold */
+            --alert-color: #e76f51;   /* Warm Orange */
+            --text-color: #264653;
+            --bg-color: #f0f4f8;
+            --paper-color: white;
+            --border-color: #d8e2dc;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-color);
+            min-height: 100vh;
+        }
+
+        /* A4 Paper Layout */
+        .sheet {
+            background-color: var(--paper-color);
+            width: 210mm;
+            min-height: 297mm;
+            padding: 15mm;
+            box-sizing: border-box;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        /* Header Section */
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 10px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin: 0 0 5px 0;
+            font-size: 26pt;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            font-size: 12pt;
+            color: #666;
+            margin-bottom: 15px;
+            font-weight: normal;
+        }
+
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14pt;
+            margin-top: 15px;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input[type="text"] {
+            border: none;
+            border-bottom: 2px dashed var(--border-color);
+            font-size: 14pt;
+            padding: 5px;
+            width: 180px;
+            font-family: inherit;
+            color: var(--primary-color);
+            text-align: center;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-bottom-color: var(--primary-color);
+        }
+
+        /* The Grid */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr); 
+            grid-template-rows: repeat(6, 1fr);    
+            gap: 10px;
+            height: 220mm; 
+        }
+
+        .cell {
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            position: relative;
+            background-color: #fff;
+            padding: 6px;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.2s;
+        }
+
+        /* Cell Styling specifically for "Challenges" */
+        .cell-number {
+            position: absolute;
+            top: 5px;
+            left: 8px;
+            font-weight: bold;
+            color: #ccc;
+            font-size: 10pt;
+        }
+
+        .cell-section {
+            margin-top: 2px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .label-top {
+            font-size: 0.75rem;
+            color: var(--alert-color);
+            font-weight: bold;
+            margin-bottom: 2px;
+            padding-left: 15px; /* Space for number */
+        }
+
+        .label-bottom {
+            font-size: 0.75rem;
+            color: var(--primary-color);
+            font-weight: bold;
+            margin-top: 8px;
+            margin-bottom: 2px;
+        }
+
+        .cell-line {
+            border-bottom: 1px solid #eee;
+            height: 18px;
+            width: 100%;
+        }
+
+        /* Checkbox area for "Fixed" status */
+        .status-area {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ddd;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 10pt;
+            color: #888;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+
+        /* Print Settings */
+        @media print {
+            body {
+                background-color: white;
+                padding: 0;
+                display: block;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .sheet {
+                box-shadow: none;
+                width: 100%;
+                height: 100vh;
+                margin: 0;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            width: 100%;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 10px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            font-weight: bold;
+        }
+        
+        button:hover {
+            background-color: #21867a;
+        }
+        
+        .print-tip {
+            font-size: 14px;
+            color: #555;
+            background: rgba(255,255,255,0.6);
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="controls no-print">
+        <button onclick="printPage()">🖨️ 列印表格</button>
+        <button onclick="clearInputs()" style="background-color: #e76f51;">🗑️ 清除內容</button>
+        <div class="print-tip">
+            💡 提示：按 <b>Ctrl+P</b> 或 <b>Cmd+P</b> 直接列印
+        </div>
+    </div>
+
+    <div class="sheet">
+        <header>
+            <h1>🚀 成長挑戰卡</h1>
+            <div class="subtitle">犯錯沒關係，那是升級的機會！我們一起把問題解決掉！</div>
+            <div class="info-bar">
+                <div class="input-group">
+                    挑戰者: <input type="text" placeholder="輸入名字" id="nameInput">
+                </div>
+                <div class="input-group">
+                    開始挑戰: <input type="text" placeholder="年 / 月 / 日" style="width: 120px;">
+                </div>
+            </div>
+            <!-- Purpose: Not a reward, but a goal setting for self-improvement -->
+            <div class="info-bar" style="justify-content: center; margin-top: 15px; font-size: 12pt; color: #555;">
+                這張卡集滿後，代表我克服了 30 個困難，變得更強大了！
+            </div>
+        </header>
+
+        <div class="grid-container" id="grid">
+            <!-- Grid items will be generated by JS -->
+        </div>
+
+        <footer>
+            <p>失敗是成功之母，每次修正都讓我更進步！ 🌱 Parents Signature: ________________</p>
+        </footer>
+    </div>
+
+    <script>
+        const grid = document.getElementById('grid');
+        const totalCells = 30;
+
+        for (let i = 1; i <= totalCells; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            
+            // Psychology: Structured flow from Problem -> Solution
+            cell.innerHTML = `
+                <div class="cell-number">${i}</div>
+                
+                <div class="cell-section">
+                    <div class="label-top">遇到的狀況 (Challenge)</div>
+                    <div class="cell-line" style="border-bottom: 1px dashed #e76f51;"></div>
+                </div>
+
+                <div class="cell-section">
+                    <div class="label-bottom">下次我會 (Solution)</div>
+                    <div class="cell-line" style="border-bottom: 1px solid #2a9d8f;"></div>
+                </div>
+
+                <div class="status-area" title="已解決/已學會">
+                    <span style="font-size: 10px; color: #ddd;">✔</span>
+                </div>
+            `;
+            grid.appendChild(cell);
+        }
+
+        function clearInputs() {
+            const inputs = document.querySelectorAll('input');
+            inputs.forEach(input => input.value = '');
+        }
+
+        function printPage() {
+            window.focus();
+            window.print();
+        }
+    </script>
+</body>
+</html>
