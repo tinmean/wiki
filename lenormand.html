@@ -6,12 +6,14 @@
   <title>Lenormand 36 抽牌工具</title>
   <style>
     :root {
-      --bg: #f7f8fb;
+      --bg: #f6f8fb;
+      --panel: #ffffff;
       --card: #ffffff;
       --text: #1f2937;
       --muted: #6b7280;
-      --border: #e5e7eb;
-      --shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+      --line: #e5e7eb;
+      --accent: #0f766e;
+      --shadow: 0 10px 22px rgba(31, 41, 55, 0.08);
       --radius: 14px;
     }
 
@@ -20,20 +22,37 @@
     body {
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
-      background: var(--bg);
       color: var(--text);
+      background:
+        radial-gradient(circle at 85% -10%, #d1fae5 0%, transparent 40%),
+        radial-gradient(circle at -10% 20%, #dbeafe 0%, transparent 35%),
+        var(--bg);
       min-height: 100vh;
     }
 
     .wrap {
       width: min(1100px, 92vw);
-      margin: 32px auto 48px;
+      margin: 24px auto 40px;
     }
 
     h1 {
-      margin: 0 0 18px;
+      margin: 0 0 12px;
       font-size: 1.35rem;
-      font-weight: 700;
+    }
+
+    .beginner {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 12px 14px;
+      margin-bottom: 12px;
+      font-size: 0.95rem;
+      line-height: 1.55;
+    }
+
+    .beginner strong {
+      color: var(--accent);
     }
 
     .controls {
@@ -41,24 +60,24 @@
       flex-wrap: wrap;
       gap: 10px;
       align-items: center;
-      background: #fff;
-      border: 1px solid var(--border);
+      background: var(--panel);
+      border: 1px solid var(--line);
       border-radius: 12px;
-      padding: 12px;
       box-shadow: var(--shadow);
+      padding: 12px;
     }
 
     select, button {
       height: 38px;
-      border: 1px solid var(--border);
+      border: 1px solid var(--line);
       border-radius: 10px;
       background: #fff;
       color: var(--text);
       font-size: 0.95rem;
       padding: 0 12px;
-      cursor: pointer;
     }
 
+    button { cursor: pointer; }
     button:hover { background: #f9fafb; }
 
     .remain {
@@ -69,7 +88,7 @@
     }
 
     .result {
-      margin-top: 18px;
+      margin-top: 16px;
       min-height: 140px;
     }
 
@@ -81,45 +100,132 @@
 
     .cards-grid-9 {
       display: grid;
-      grid-template-columns: repeat(3, minmax(90px, 1fr));
+      grid-template-columns: repeat(3, minmax(95px, 1fr));
       gap: 12px;
       max-width: 760px;
     }
 
     .card {
       background: var(--card);
-      border: 1px solid var(--border);
+      border: 1px solid var(--line);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
-      padding: 14px 12px;
-      min-height: 110px;
+      padding: 12px;
+      min-height: 120px;
+      text-align: center;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      text-align: center;
-      line-height: 1.45;
+      line-height: 1.4;
+      position: relative;
     }
 
     .id { font-weight: 700; margin-bottom: 4px; }
     .zh { font-size: 1rem; }
     .en { font-size: 0.92rem; color: var(--muted); }
 
+    .pos {
+      margin-top: 6px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      border-top: 1px dashed var(--line);
+      padding-top: 6px;
+    }
+
+    .grid-guide {
+      margin-top: 14px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 12px;
+      line-height: 1.55;
+      font-size: 0.93rem;
+    }
+
+    .grid-guide h3 {
+      margin: 0 0 8px;
+      font-size: 0.98rem;
+      color: var(--accent);
+    }
+
+    .grid-guide p {
+      margin: 6px 0;
+    }
+
+    .history {
+      margin-top: 18px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 12px;
+    }
+
+    .history-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .history h2 {
+      font-size: 1rem;
+      margin: 0;
+    }
+
+    .history-list {
+      margin: 0;
+      padding-left: 18px;
+      color: #374151;
+      line-height: 1.5;
+    }
+
+    .history-empty {
+      color: var(--muted);
+      font-size: 0.92rem;
+      margin: 0;
+    }
+
     .hint {
-      margin-top: 12px;
+      margin-top: 10px;
       color: var(--muted);
       font-size: 0.9rem;
     }
 
     @media (max-width: 640px) {
-      .remain { width: 100%; margin-left: 0; }
-      .cards-grid-9 { grid-template-columns: repeat(3, 1fr); }
-      .card { min-height: 96px; padding: 12px 8px; }
+      .remain {
+        margin-left: 0;
+        width: 100%;
+      }
+
+      .history-head {
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .cards-grid-9 {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .card {
+        min-height: 106px;
+        padding: 10px 8px;
+      }
     }
   </style>
 </head>
 <body>
   <div class="wrap">
     <h1>Lenormand 36 張抽牌工具（純文字極簡版）</h1>
+
+    <div class="beginner">
+      <strong>新手簡要說明：</strong>
+      先選抽牌張數（2/3/5/9），再按「抽牌」。2/3/5 是線性牌陣，9 是 3×3 九宮格。
+      九宮格在 Lenormand 中不是像塔羅牌那樣每格固定意義，而是看多張組合與橫直斜結構。
+      每次抽牌不重複；若你已抽過牌再次抽牌，系統會先詢問是否重新抽。
+      「重洗牌」只打亂剩餘牌組，「重置」會清空結果並重建完整 36 張牌。
+    </div>
 
     <div class="controls">
       <label for="drawCount">抽牌張數：</label>
@@ -139,6 +245,15 @@
 
     <div class="result" id="result"></div>
     <div class="hint">卡片格式：#編號 / 繁中牌名 / 英文牌名</div>
+    <div id="gridGuide" class="grid-guide" hidden></div>
+
+    <section class="history">
+      <div class="history-head">
+        <h2>本地抽牌紀錄</h2>
+        <button id="clearHistoryBtn" type="button">清除紀錄</button>
+      </div>
+      <div id="historyBox"></div>
+    </section>
   </div>
 
   <script>
@@ -181,15 +296,21 @@
       { id: 36, zh: "十字架", en: "Cross" }
     ];
 
+    const STORAGE_KEY = "lenormand_history_v1";
+    const MAX_HISTORY = 20;
+
     let deck = [];
     let currentSpread = [];
 
     const drawCountEl = document.getElementById("drawCount");
     const remainEl = document.getElementById("remain");
     const resultEl = document.getElementById("result");
+    const gridGuideEl = document.getElementById("gridGuide");
     const shuffleBtn = document.getElementById("shuffleBtn");
     const drawBtn = document.getElementById("drawBtn");
     const resetBtn = document.getElementById("resetBtn");
+    const clearHistoryBtn = document.getElementById("clearHistoryBtn");
+    const historyBox = document.getElementById("historyBox");
 
     function fisherYatesShuffle(arr) {
       for (let i = arr.length - 1; i > 0; i--) {
@@ -210,19 +331,92 @@
       remainEl.textContent = `剩餘牌數：${deck.length}`;
     }
 
+    function formatTime(isoString) {
+      const d = new Date(isoString);
+      return d.toLocaleString("zh-Hant-TW", {
+        hour12: false,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+    }
+
+    function getHistory() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (_) {
+        return [];
+      }
+    }
+
+    function saveHistoryRecord(count, spread) {
+      const history = getHistory();
+      const entry = {
+        time: new Date().toISOString(),
+        count,
+        cards: spread.map((c) => ({ id: c.id, zh: c.zh, en: c.en }))
+      };
+      history.unshift(entry);
+      const trimmed = history.slice(0, MAX_HISTORY);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed));
+      renderHistory();
+    }
+
+    function clearHistory() {
+      localStorage.removeItem(STORAGE_KEY);
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const history = getHistory();
+      historyBox.innerHTML = "";
+
+      if (history.length === 0) {
+        const p = document.createElement("p");
+        p.className = "history-empty";
+        p.textContent = "目前沒有本地紀錄。";
+        historyBox.appendChild(p);
+        return;
+      }
+
+      const ol = document.createElement("ol");
+      ol.className = "history-list";
+
+      history.forEach((item) => {
+        const li = document.createElement("li");
+        const cardText = item.cards.map((c) => `#${c.id} ${c.zh}/${c.en}`).join("、");
+        li.textContent = `[${formatTime(item.time)}] ${item.count}張：${cardText}`;
+        ol.appendChild(li);
+      });
+
+      historyBox.appendChild(ol);
+    }
+
     function renderCards(spread) {
       const count = spread.length;
       const containerClass = count === 9 ? "cards-grid-9" : "cards-line";
       const wrapper = document.createElement("div");
       wrapper.className = containerClass;
 
-      spread.forEach(card => {
+      spread.forEach((card, idx) => {
         const el = document.createElement("div");
         el.className = "card";
+
+        let positionHint = "";
+        if (count === 9) {
+          positionHint = `<div class="pos">位置${idx + 1}</div>`;
+        }
+
         el.innerHTML = `
           <div class="id">#${card.id}</div>
           <div class="zh">${card.zh}</div>
           <div class="en">${card.en}</div>
+          ${positionHint}
         `;
         wrapper.appendChild(el);
       });
@@ -233,8 +427,24 @@
     function render() {
       updateRemain();
       resultEl.innerHTML = "";
+      gridGuideEl.hidden = true;
+      gridGuideEl.innerHTML = "";
       if (currentSpread.length > 0) {
         resultEl.appendChild(renderCards(currentSpread));
+        if (currentSpread.length === 9) {
+          gridGuideEl.hidden = false;
+          gridGuideEl.innerHTML = `
+            <h3>九宮格解讀說明（Lenormand）</h3>
+            <p>5：主題卡（核心）。</p>
+            <p>1+9、3+7：事件的框架範圍。</p>
+            <p>1+4+7：看過去。</p>
+            <p>2+5+8：看現在。</p>
+            <p>3+6+9：看未來。</p>
+            <p>1+2+3：影響這件事的因素，或心中的想法。</p>
+            <p>4+5+6：現況。</p>
+            <p>7+8+9：已知或掌控中的內容，是基礎或可控的問題。</p>
+          `;
+        }
       }
     }
 
@@ -244,7 +454,7 @@
       if (currentSpread.length > 0) {
         const ok = window.confirm("已經有抽牌結果，是否重新抽牌？");
         if (!ok) return;
-        rebuildDeck(); // 重新抽牌：回到完整 36 張
+        rebuildDeck();
       }
 
       if (deck.length < count) {
@@ -252,10 +462,10 @@
         return;
       }
 
-      // 先重洗再抽，並從 deck 移除已抽牌，確保不重複
       fisherYatesShuffle(deck);
       currentSpread = deck.splice(0, count);
       render();
+      saveHistoryRecord(count, currentSpread);
     }
 
     shuffleBtn.addEventListener("click", () => {
@@ -270,7 +480,14 @@
       rebuildDeck();
     });
 
+    clearHistoryBtn.addEventListener("click", () => {
+      const ok = window.confirm("確定清除本地抽牌紀錄？");
+      if (!ok) return;
+      clearHistory();
+    });
+
     rebuildDeck();
+    renderHistory();
   </script>
 </body>
 </html>
