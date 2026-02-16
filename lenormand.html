@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lenormand 36 抽牌工具</title>
+  <style>
+    :root {
+      --bg: #f7f8fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .wrap {
+      width: min(1100px, 92vw);
+      margin: 32px auto 48px;
+    }
+
+    h1 {
+      margin: 0 0 18px;
+      font-size: 1.35rem;
+      font-weight: 700;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    select, button {
+      height: 38px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--text);
+      font-size: 0.95rem;
+      padding: 0 12px;
+      cursor: pointer;
+    }
+
+    button:hover { background: #f9fafb; }
+
+    .remain {
+      margin-left: auto;
+      color: var(--muted);
+      font-size: 0.95rem;
+      white-space: nowrap;
+    }
+
+    .result {
+      margin-top: 18px;
+      min-height: 140px;
+    }
+
+    .cards-line {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .cards-grid-9 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(90px, 1fr));
+      gap: 12px;
+      max-width: 760px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px 12px;
+      min-height: 110px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-align: center;
+      line-height: 1.45;
+    }
+
+    .id { font-weight: 700; margin-bottom: 4px; }
+    .zh { font-size: 1rem; }
+    .en { font-size: 0.92rem; color: var(--muted); }
+
+    .hint {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 640px) {
+      .remain { width: 100%; margin-left: 0; }
+      .cards-grid-9 { grid-template-columns: repeat(3, 1fr); }
+      .card { min-height: 96px; padding: 12px 8px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Lenormand 36 張抽牌工具（純文字極簡版）</h1>
+
+    <div class="controls">
+      <label for="drawCount">抽牌張數：</label>
+      <select id="drawCount">
+        <option value="2">2</option>
+        <option value="3" selected>3</option>
+        <option value="5">5</option>
+        <option value="9">9</option>
+      </select>
+
+      <button id="shuffleBtn" type="button">重洗牌</button>
+      <button id="drawBtn" type="button">抽牌</button>
+      <button id="resetBtn" type="button">重置</button>
+
+      <div class="remain" id="remain">剩餘牌數：36</div>
+    </div>
+
+    <div class="result" id="result"></div>
+    <div class="hint">卡片格式：#編號 / 繁中牌名 / 英文牌名</div>
+  </div>
+
+  <script>
+    const cards = [
+      { id: 1, zh: "騎士", en: "Rider" },
+      { id: 2, zh: "幸運草", en: "Clover" },
+      { id: 3, zh: "船", en: "Ship" },
+      { id: 4, zh: "房子", en: "House" },
+      { id: 5, zh: "樹", en: "Tree" },
+      { id: 6, zh: "雲", en: "Clouds" },
+      { id: 7, zh: "蛇", en: "Snake" },
+      { id: 8, zh: "棺材", en: "Coffin" },
+      { id: 9, zh: "花束", en: "Bouquet" },
+      { id: 10, zh: "鐮刀", en: "Scythe" },
+      { id: 11, zh: "鞭子", en: "Whip" },
+      { id: 12, zh: "鳥", en: "Birds" },
+      { id: 13, zh: "小孩", en: "Child" },
+      { id: 14, zh: "狐狸", en: "Fox" },
+      { id: 15, zh: "熊", en: "Bear" },
+      { id: 16, zh: "星星", en: "Stars" },
+      { id: 17, zh: "鸛", en: "Stork" },
+      { id: 18, zh: "狗", en: "Dog" },
+      { id: 19, zh: "塔", en: "Tower" },
+      { id: 20, zh: "花園", en: "Garden" },
+      { id: 21, zh: "山", en: "Mountain" },
+      { id: 22, zh: "十字路口", en: "Crossroads" },
+      { id: 23, zh: "老鼠", en: "Mice" },
+      { id: 24, zh: "心", en: "Heart" },
+      { id: 25, zh: "戒指", en: "Ring" },
+      { id: 26, zh: "書", en: "Book" },
+      { id: 27, zh: "信", en: "Letter" },
+      { id: 28, zh: "男人", en: "Man" },
+      { id: 29, zh: "女人", en: "Woman" },
+      { id: 30, zh: "百合", en: "Lily" },
+      { id: 31, zh: "太陽", en: "Sun" },
+      { id: 32, zh: "月亮", en: "Moon" },
+      { id: 33, zh: "鑰匙", en: "Key" },
+      { id: 34, zh: "魚", en: "Fish" },
+      { id: 35, zh: "錨", en: "Anchor" },
+      { id: 36, zh: "十字架", en: "Cross" }
+    ];
+
+    let deck = [];
+    let currentSpread = [];
+
+    const drawCountEl = document.getElementById("drawCount");
+    const remainEl = document.getElementById("remain");
+    const resultEl = document.getElementById("result");
+    const shuffleBtn = document.getElementById("shuffleBtn");
+    const drawBtn = document.getElementById("drawBtn");
+    const resetBtn = document.getElementById("resetBtn");
+
+    function fisherYatesShuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function rebuildDeck() {
+      deck = cards.slice();
+      fisherYatesShuffle(deck);
+      currentSpread = [];
+      render();
+    }
+
+    function updateRemain() {
+      remainEl.textContent = `剩餘牌數：${deck.length}`;
+    }
+
+    function renderCards(spread) {
+      const count = spread.length;
+      const containerClass = count === 9 ? "cards-grid-9" : "cards-line";
+      const wrapper = document.createElement("div");
+      wrapper.className = containerClass;
+
+      spread.forEach(card => {
+        const el = document.createElement("div");
+        el.className = "card";
+        el.innerHTML = `
+          <div class="id">#${card.id}</div>
+          <div class="zh">${card.zh}</div>
+          <div class="en">${card.en}</div>
+        `;
+        wrapper.appendChild(el);
+      });
+
+      return wrapper;
+    }
+
+    function render() {
+      updateRemain();
+      resultEl.innerHTML = "";
+      if (currentSpread.length > 0) {
+        resultEl.appendChild(renderCards(currentSpread));
+      }
+    }
+
+    function drawCards() {
+      const count = Number(drawCountEl.value);
+
+      if (currentSpread.length > 0) {
+        const ok = window.confirm("已經有抽牌結果，是否重新抽牌？");
+        if (!ok) return;
+        rebuildDeck(); // 重新抽牌：回到完整 36 張
+      }
+
+      if (deck.length < count) {
+        window.alert("剩餘牌數不足，請先重置。");
+        return;
+      }
+
+      // 先重洗再抽，並從 deck 移除已抽牌，確保不重複
+      fisherYatesShuffle(deck);
+      currentSpread = deck.splice(0, count);
+      render();
+    }
+
+    shuffleBtn.addEventListener("click", () => {
+      fisherYatesShuffle(deck);
+      window.alert("已重洗剩餘牌組。");
+      updateRemain();
+    });
+
+    drawBtn.addEventListener("click", drawCards);
+
+    resetBtn.addEventListener("click", () => {
+      rebuildDeck();
+    });
+
+    rebuildDeck();
+  </script>
+</body>
+</html>
