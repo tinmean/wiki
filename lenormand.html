@@ -193,6 +193,30 @@
       font-size: 0.9rem;
     }
 
+    .links {
+      margin-top: 18px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      padding: 12px;
+      font-size: 0.95rem;
+    }
+
+    .links h2 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+    }
+
+    .links a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .links a:hover {
+      text-decoration: underline;
+    }
+
     @media (max-width: 640px) {
       .remain {
         margin-left: 0;
@@ -253,6 +277,12 @@
         <button id="clearHistoryBtn" type="button">清除紀錄</button>
       </div>
       <div id="historyBox"></div>
+    </section>
+
+    <section class="links">
+      <h2>相關連結</h2>
+      <p>老K手面相：<a href="https://kfacehand.com" target="_blank" rel="noopener noreferrer">kfacehand.com</a></p>
+      <p>K書中心：<a href="https://learn.kfacehand.com" target="_blank" rel="noopener noreferrer">learn.kfacehand.com</a></p>
     </section>
   </div>
 
