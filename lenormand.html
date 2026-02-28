@@ -217,6 +217,22 @@
       text-decoration: underline;
     }
 
+    .toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.92rem;
+      color: #374151;
+      padding: 0 4px;
+      height: 38px;
+    }
+
+    .poker {
+      margin-top: 6px;
+      font-size: 0.84rem;
+      color: #374151;
+    }
+
     @media (max-width: 640px) {
       .remain {
         margin-left: 0;
@@ -247,6 +263,7 @@
       <strong>新手簡要說明：</strong>
       先選抽牌張數（2/3/5/9），再按「抽牌」。2/3/5 是線性牌陣，9 是 3×3 九宮格。
       九宮格在 Lenormand 中不是像塔羅牌那樣每格固定意義，而是看多張組合與橫直斜結構。
+      你也可以開關「顯示撲克牌」來查看每張牌對應的花色與點數。
       每次抽牌不重複；若你已抽過牌再次抽牌，系統會先詢問是否重新抽。
       「重洗牌」只打亂剩餘牌組，「重置」會清空結果並重建完整 36 張牌。
     </div>
@@ -263,6 +280,10 @@
       <button id="shuffleBtn" type="button">重洗牌</button>
       <button id="drawBtn" type="button">抽牌</button>
       <button id="resetBtn" type="button">重置</button>
+      <label for="showPoker" class="toggle">
+        <input id="showPoker" type="checkbox" checked />
+        顯示撲克牌
+      </label>
 
       <div class="remain" id="remain">剩餘牌數：36</div>
     </div>
@@ -288,42 +309,42 @@
 
   <script>
     const cards = [
-      { id: 1, zh: "騎士", en: "Rider" },
-      { id: 2, zh: "幸運草", en: "Clover" },
-      { id: 3, zh: "船", en: "Ship" },
-      { id: 4, zh: "房子", en: "House" },
-      { id: 5, zh: "樹", en: "Tree" },
-      { id: 6, zh: "雲", en: "Clouds" },
-      { id: 7, zh: "蛇", en: "Snake" },
-      { id: 8, zh: "棺材", en: "Coffin" },
-      { id: 9, zh: "花束", en: "Bouquet" },
-      { id: 10, zh: "鐮刀", en: "Scythe" },
-      { id: 11, zh: "鞭子", en: "Whip" },
-      { id: 12, zh: "鳥", en: "Birds" },
-      { id: 13, zh: "小孩", en: "Child" },
-      { id: 14, zh: "狐狸", en: "Fox" },
-      { id: 15, zh: "熊", en: "Bear" },
-      { id: 16, zh: "星星", en: "Stars" },
-      { id: 17, zh: "鸛", en: "Stork" },
-      { id: 18, zh: "狗", en: "Dog" },
-      { id: 19, zh: "塔", en: "Tower" },
-      { id: 20, zh: "花園", en: "Garden" },
-      { id: 21, zh: "山", en: "Mountain" },
-      { id: 22, zh: "十字路口", en: "Crossroads" },
-      { id: 23, zh: "老鼠", en: "Mice" },
-      { id: 24, zh: "心", en: "Heart" },
-      { id: 25, zh: "戒指", en: "Ring" },
-      { id: 26, zh: "書", en: "Book" },
-      { id: 27, zh: "信", en: "Letter" },
-      { id: 28, zh: "男人", en: "Man" },
-      { id: 29, zh: "女人", en: "Woman" },
-      { id: 30, zh: "百合", en: "Lily" },
-      { id: 31, zh: "太陽", en: "Sun" },
-      { id: 32, zh: "月亮", en: "Moon" },
-      { id: 33, zh: "鑰匙", en: "Key" },
-      { id: 34, zh: "魚", en: "Fish" },
-      { id: 35, zh: "錨", en: "Anchor" },
-      { id: 36, zh: "十字架", en: "Cross" }
+      { id: 1, zh: "騎士", en: "Rider", poker: "紅心9 (9♥)" },
+      { id: 2, zh: "幸運草", en: "Clover", poker: "方塊6 (6♦)" },
+      { id: 3, zh: "船", en: "Ship", poker: "黑桃10 (10♠)" },
+      { id: 4, zh: "房子", en: "House", poker: "紅心K (K♥)" },
+      { id: 5, zh: "樹", en: "Tree", poker: "紅心7 (7♥)" },
+      { id: 6, zh: "雲", en: "Clouds", poker: "梅花K (K♣)" },
+      { id: 7, zh: "蛇", en: "Snake", poker: "梅花Q (Q♣)" },
+      { id: 8, zh: "棺材", en: "Coffin", poker: "方塊9 (9♦)" },
+      { id: 9, zh: "花束", en: "Bouquet", poker: "黑桃Q (Q♠)" },
+      { id: 10, zh: "鐮刀", en: "Scythe", poker: "方塊J (J♦)" },
+      { id: 11, zh: "鞭子", en: "Whip", poker: "梅花J (J♣)" },
+      { id: 12, zh: "鳥", en: "Birds", poker: "方塊7 (7♦)" },
+      { id: 13, zh: "小孩", en: "Child", poker: "黑桃J (J♠)" },
+      { id: 14, zh: "狐狸", en: "Fox", poker: "梅花9 (9♣)" },
+      { id: 15, zh: "熊", en: "Bear", poker: "梅花10 (10♣)" },
+      { id: 16, zh: "星星", en: "Stars", poker: "紅心6 (6♥)" },
+      { id: 17, zh: "鸛", en: "Stork", poker: "紅心Q (Q♥)" },
+      { id: 18, zh: "狗", en: "Dog", poker: "紅心10 (10♥)" },
+      { id: 19, zh: "塔", en: "Tower", poker: "黑桃6 (6♠)" },
+      { id: 20, zh: "花園", en: "Garden", poker: "黑桃8 (8♠)" },
+      { id: 21, zh: "山", en: "Mountain", poker: "梅花8 (8♣)" },
+      { id: 22, zh: "十字路口", en: "Crossroads", poker: "方塊Q (Q♦)" },
+      { id: 23, zh: "老鼠", en: "Mice", poker: "梅花7 (7♣)" },
+      { id: 24, zh: "心", en: "Heart", poker: "紅心J (J♥)" },
+      { id: 25, zh: "戒指", en: "Ring", poker: "梅花A (A♣)" },
+      { id: 26, zh: "書", en: "Book", poker: "方塊10 (10♦)" },
+      { id: 27, zh: "信", en: "Letter", poker: "黑桃7 (7♠)" },
+      { id: 28, zh: "男人", en: "Man", poker: "紅心A (A♥)" },
+      { id: 29, zh: "女人", en: "Woman", poker: "黑桃A (A♠)" },
+      { id: 30, zh: "百合", en: "Lily", poker: "黑桃K (K♠)" },
+      { id: 31, zh: "太陽", en: "Sun", poker: "方塊A (A♦)" },
+      { id: 32, zh: "月亮", en: "Moon", poker: "紅心8 (8♥)" },
+      { id: 33, zh: "鑰匙", en: "Key", poker: "方塊8 (8♦)" },
+      { id: 34, zh: "魚", en: "Fish", poker: "方塊K (K♦)" },
+      { id: 35, zh: "錨", en: "Anchor", poker: "黑桃9 (9♠)" },
+      { id: 36, zh: "十字架", en: "Cross", poker: "梅花6 (6♣)" }
     ];
 
     const STORAGE_KEY = "lenormand_history_v1";
@@ -333,6 +354,7 @@
     let currentSpread = [];
 
     const drawCountEl = document.getElementById("drawCount");
+    const showPokerEl = document.getElementById("showPoker");
     const remainEl = document.getElementById("remain");
     const resultEl = document.getElementById("result");
     const gridGuideEl = document.getElementById("gridGuide");
@@ -441,11 +463,13 @@
         if (count === 9) {
           positionHint = `<div class="pos">位置${idx + 1}</div>`;
         }
+        const pokerText = showPokerEl.checked ? `<div class="poker">${card.poker}</div>` : "";
 
         el.innerHTML = `
           <div class="id">#${card.id}</div>
           <div class="zh">${card.zh}</div>
           <div class="en">${card.en}</div>
+          ${pokerText}
           ${positionHint}
         `;
         wrapper.appendChild(el);
@@ -514,6 +538,10 @@
       const ok = window.confirm("確定清除本地抽牌紀錄？");
       if (!ok) return;
       clearHistory();
+    });
+
+    showPokerEl.addEventListener("change", () => {
+      render();
     });
 
     rebuildDeck();
