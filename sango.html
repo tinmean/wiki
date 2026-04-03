@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>三國殺 - 網頁基礎版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap');
+
+        :root {
+            --paper: #f5f5dc;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #121212;
+            color: #eee;
+            margin: 0;
+            overflow: hidden;
+            touch-action: manipulation; /* 防止雙擊放大 */
+            user-select: none;
+        }
+
+        .game-container {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            height: 100vh;
+            max-width: 100vw;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        /* 頂部敵人區域 */
+        .enemy-area {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 5px;
+            background: linear-gradient(to bottom, #2d1d1a, #1a1a1a);
+            border-bottom: 2px solid #4e342e;
+        }
+
+        .player-card {
+            background: linear-gradient(135deg, #3e2723, #1a1a1a);
+            border: 2px solid #5d4037;
+            border-radius: 8px;
+            padding: 8px;
+            width: 30%;
+            text-align: center;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .player-card.active {
+            border-color: #fbc02d;
+            box-shadow: 0 0 10px #fbc02d;
+            transform: translateY(2px);
+        }
+
+        .player-card.dead {
+            filter: grayscale(1) opacity(0.5);
+            pointer-events: none;
+        }
+
+        .player-card.targetable {
+            animation: pulse-border 1.5s infinite;
+            cursor: pointer;
+        }
+
+        @keyframes pulse-border {
+            0% { border-color: #ff9800; box-shadow: 0 0 5px #ff9800; }
+            50% { border-color: #ff5722; box-shadow: 0 0 15px #ff5722; }
+            100% { border-color: #ff9800; box-shadow: 0 0 5px #ff9800; }
+        }
+
+        .hp-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 2px;
+            margin-top: 4px;
+        }
+
+        .hp-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #f44336;
+            box-shadow: inset -2px -2px 4px rgba(0,0,0,0.5);
+        }
+
+        .hp-dot.empty {
+            background-color: #333;
+            box-shadow: inset 1px 1px 3px rgba(0,0,0,0.8);
+        }
+
+        /* 中間戰場與日誌 */
+        .battlefield {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .log-box {
+            background: rgba(0,0,0,0.6);
+            font-size: 0.85rem;
+            padding: 10px;
+            overflow-y: auto;
+            height: 140px;
+            margin: 10px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            line-height: 1.4;
+        }
+
+        .log-entry { margin-bottom: 4px; }
+
+        /* 提示文字 */
+        .hint-text {
+            text-align: center;
+            padding: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #ffeb3b;
+            text-shadow: 1px 1px 2px black;
+            height: 50px;
+        }
+
+        /* 彈出詢問視窗 (例如要不要出閃) */
+        .reaction-modal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(20, 20, 20, 0.95);
+            border: 2px solid #fbc02d;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            width: 85%;
+            z-index: 50;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+        }
+
+        /* 底部玩家手牌區 */
+        .player-area {
+            background: #212121;
+            border-top: 2px solid #424242;
+            padding-bottom: env(safe-area-inset-bottom, 10px);
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 15px;
+            background: #111;
+        }
+
+        .hand-container {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 15px 10px 20px 10px;
+            scrollbar-width: none;
+            min-height: 130px;
+        }
+        .hand-container::-webkit-scrollbar { display: none; }
+
+        .card {
+            width: 75px;
+            height: 110px;
+            background: var(--paper);
+            color: #111;
+            border-radius: 6px;
+            border: 1px solid #777;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px;
+            font-weight: bold;
+            flex-shrink: 0;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 2px 3px 6px rgba(0,0,0,0.4);
+        }
+
+        .card.playable { cursor: pointer; }
+        .card.selected {
+            transform: translateY(-15px);
+            box-shadow: 0 0 15px #fbc02d;
+            border-color: #fbc02d;
+            border-width: 2px;
+        }
+        .card-red { color: #b71c1c; }
+        .card-black { color: #212121; }
+
+        .game-over-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app" class="game-container">
+    
+    <!-- 頂部：AI 敵人區域 -->
+    <div class="enemy-area">
+        <div v-for="enemy in enemies" :key="enemy.id" 
+             class="player-card" 
+             :class="{ 
+                 'active': currentTurn === enemy.id, 
+                 'dead': enemy.hp <= 0, 
+                 'targetable': isChoosingTarget && enemy.hp > 0 
+             }"
+             @click="selectTarget(enemy)">
+            <div class="text-[10px] text-gray-400 font-bold mb-1">{{ enemy.roleName }}</div>
+            <div class="text-sm font-bold text-white">{{ enemy.name }}</div>
+            <div class="hp-container">
+                <div v-for="n in enemy.maxHp" :key="n" class="hp-dot" :class="{ empty: n > enemy.hp }"></div>
+            </div>
+            <div class="text-[11px] mt-2 text-gray-300">手牌: {{ enemy.hand.length }}</div>
+        </div>
+    </div>
+
+    <!-- 中間：戰鬥日誌與提示 -->
+    <div class="battlefield">
+        <div class="log-box" id="logBox">
+            <div v-for="(log, index) in logs" :key="index" class="log-entry">
+                <span :class="log.color">{{ log.text }}</span>
+            </div>
+        </div>
+        
+        <div class="hint-text">
+            {{ hintText }}
+        </div>
+
+        <!-- 回應詢問視窗 (例如: 是否出閃) -->
+        <div v-if="showingReaction" class="reaction-modal">
+            <p class="text-lg text-white mb-5 font-bold">{{ reactionPrompt }}</p>
+            <div class="flex justify-center gap-4">
+                <button @click="handleReaction(true)" class="bg-yellow-600 hover:bg-yellow-500 text-black px-6 py-2 rounded font-bold text-lg shadow-lg">
+                    打出 {{ reactionCardName }}
+                </button>
+                <button @click="handleReaction(false)" class="bg-gray-600 hover:bg-gray-500 text-white px-6 py-2 rounded font-bold text-lg shadow-lg">
+                    不出
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部：玩家手牌與狀態 -->
+    <div class="player-area">
+        <div class="status-bar">
+            <div class="flex items-center gap-3">
+                <span class="font-bold text-yellow-400 text-lg">你 (主公)</span>
+                <div class="hp-container">
+                    <div v-for="n in player.maxHp" :key="n" class="hp-dot" :class="{ empty: n > player.hp }"></div>
+                </div>
+            </div>
+            <div>
+                <button v-if="isMyTurn && !isChoosingTarget && !showingReaction" @click="endTurn" 
+                        class="bg-red-800 text-white font-bold text-sm px-4 py-2 rounded shadow border border-red-500 active:bg-red-900">
+                    結束回合
+                </button>
+                <button v-if="isChoosingTarget" @click="cancelTargetSelection" 
+                        class="bg-gray-700 text-white font-bold text-sm px-4 py-2 rounded shadow border border-gray-500">
+                    取消出牌
+                </button>
+            </div>
+        </div>
+
+        <div class="hand-container" id="hand">
+            <div v-for="(card, index) in player.hand" :key="card.uid" 
+                 class="card" 
+                 :class="{ 
+                     'selected': selectedCards.includes(index), 
+                     'card-red': card.color === 'red',
+                     'card-black': card.color === 'black',
+                     'playable': isMyTurn && !showingReaction 
+                 }"
+                 @click="clickCard(index)">
+                <div class="text-xs self-start">{{ card.suit }}{{ card.rank }}</div>
+                <div class="text-3xl my-auto">{{ card.icon }}</div>
+                <div class="text-sm">{{ card.name }}</div>
+            </div>
+            <div v-if="player.hand.length === 0" class="text-gray-500 flex items-center justify-center w-full text-sm">
+                目前沒有手牌
+            </div>
+        </div>
+    </div>
+
+    <!-- 遊戲結束結算畫面 -->
+    <div v-if="gameOver" class="game-over-overlay">
+        <h1 class="text-4xl font-bold mb-4" :class="playerWon ? 'text-yellow-400' : 'text-red-500'">
+            {{ playerWon ? '勝利！' : '敗北！' }}
+        </h1>
+        <p class="text-white text-lg mb-8">{{ gameOverReason }}</p>
+        <button @click="restartGame" class="bg-blue-600 text-white px-8 py-3 rounded-lg font-bold text-xl shadow-lg border-2 border-blue-400">
+            再來一局
+        </button>
+    </div>
+
+</div>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script>
+const { createApp, ref, computed, onMounted, nextTick } = Vue;
+
+createApp({
+    setup() {
+        const logs = ref([]);
+        const currentTurn = ref(-1); 
+        const hintText = ref("遊戲準備中...");
+        
+        const gameOver = ref(false);
+        const playerWon = ref(false);
+        const gameOverReason = ref("");
+
+        // 定義牌堆
+        const CARD_TYPES = [
+            { name: "殺", icon: "🗡️", type: "basic", color: "black", weight: 30 },
+            { name: "閃", icon: "🛡️", type: "basic", color: "red", weight: 15 },
+            { name: "桃", icon: "🍑", type: "basic", color: "red", weight: 8 },
+            { name: "順手牽羊", icon: "🤲", type: "tool", color: "black", weight: 5 },
+            { name: "過河拆橋", icon: "⚒️", type: "tool", color: "black", weight: 5 },
+            { name: "萬箭齊發", icon: "🏹", type: "tool", color: "red", weight: 2 },
+            { name: "南蠻入侵", icon: "🐘", type: "tool", color: "black", weight: 2 },
+        ];
+
+        const deck = ref([]);
+        
+        const generateDeck = () => {
+            let newDeck = [];
+            let uid = 0;
+            const suits = ['♠', '♥', '♣', '♦'];
+            const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+            
+            CARD_TYPES.forEach(ct => {
+                for(let i=0; i<ct.weight; i++) {
+                    newDeck.push({
+                        ...ct,
+                        uid: Date.now() + uid++,
+                        suit: suits[Math.floor(Math.random()*4)],
+                        rank: ranks[Math.floor(Math.random()*13)],
+                        color: (Math.random() > 0.5) ? 'red' : 'black'
+                    });
+                }
+            });
+            // 洗牌
+            for (let i = newDeck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newDeck[i], newDeck[j]] = [newDeck[j], newDeck[i]];
+            }
+            return newDeck;
+        };
+
+        const createInitialPlayers = () => [
+            { id: 0, name: "玩家", hp: 4, maxHp: 4, hand: [], role: 'lord', roleName: '主公' },
+            { id: 1, name: "呂布", hp: 4, maxHp: 4, hand: [], role: 'rebel', roleName: '反賊' },
+            { id: 2, name: "董卓", hp: 4, maxHp: 4, hand: [], role: 'rebel', roleName: '反賊' },
+            { id: 3, name: "司馬懿", hp: 3, maxHp: 3, hand: [], role: 'rebel', roleName: '反賊' }
+        ];
+
+        const players = ref(createInitialPlayers());
+        const selectedCards = ref([]);
+        const isChoosingTarget = ref(false);
+        const selectedCardObject = ref(null);
+
+        // 響應狀態 (是否出閃/無懈可擊等)
+        const showingReaction = ref(false);
+        const reactionPrompt = ref("");
+        const reactionCardName = ref("");
+        let reactionResolveFunction = null;
+
+        const player = computed(() => players.value[0]);
+        const enemies = computed(() => players.value.slice(1));
+        const isMyTurn = computed(() => currentTurn.value === 0 && !gameOver.value);
+
+        const scrollToBottomLog = async () => {
+            await nextTick();
+            const box = document.getElementById('logBox');
+            if(box) box.scrollTop = box.scrollHeight;
+        };
+
+        const addLog = (text, color = "text-gray-300") => {
+            logs.value.push({ text, color });
+            if (logs.value.length > 50) logs.value.shift(); // 限制日誌長度
+            scrollToBottomLog();
+        };
+
+        const drawCards = (playerId, count) => {
+            const p = players.value[playerId];
+            for(let i=0; i<count; i++) {
+                if(deck.value.length === 0) deck.value = generateDeck();
+                p.hand.push(deck.value.pop());
+            }
+            if (playerId === 0) addLog(`你摸了 ${count} 張牌`);
+        };
+
+        const initGame = () => {
+            deck.value = generateDeck();
+            players.value = createInitialPlayers();
+            logs.value = [];
+            gameOver.value = false;
+            
+            addLog("=== 遊戲開始 ===", "text-yellow-400 font-bold");
+            addLog("你的目標是消滅所有反賊！", "text-white");
+            
+            players.value.forEach(p => drawCards(p.id, 4));
+            setTimeout(() => startTurn(0), 1000);
+        };
+
+        const startTurn = async (id) => {
+            if (gameOver.value) return;
+            
+            currentTurn.value = id;
+            const p = players.value[id];
+            
+            if(p.hp <= 0) {
+                nextTurn();
+                return;
+            }
+
+            addLog(`--- 【${p.name}】 的回合 ---`, "text-yellow-200 mt-2");
+            
+            // 摸牌階段
+            drawCards(id, 2);
+            
+            if(id === 0) {
+                hintText.value = "你的回合：請選擇手牌使用，或點擊「結束回合」";
+            } else {
+                hintText.value = `${p.name} 正在思考...`;
+                await runAILogic(p);
+            }
+        };
+
+        const nextTurn = () => {
+            if (gameOver.value) return;
+            selectedCards.value = [];
+            isChoosingTarget.value = false;
+            let next = (currentTurn.value + 1) % 4;
+            startTurn(next);
+        };
+
+        // --- 玩家互動邏輯 ---
+
+        const clickCard = (index) => {
+            if(!isMyTurn.value || showingReaction.value || gameOver.value) return;
+            
+            const card = player.value.hand[index];
+            
+            // 取消選取
+            if(selectedCards.value.includes(index)) {
+                cancelTargetSelection();
+                return;
+            }
+
+            // 規則檢查
+            if(card.name === "閃") {
+                addLog("【閃】只能在被【殺】或【萬箭齊發】攻擊時打出", "text-gray-400");
+                return;
+            }
+            if(card.name === "桃" && player.value.hp >= player.value.maxHp) {
+                addLog("體力已滿，無法使用【桃】", "text-gray-400");
+                return;
+            }
+
+            selectedCards.value = [index];
+            selectedCardObject.value = card;
+
+            if(["殺", "順手牽羊", "過河拆橋"].includes(card.name)) {
+                isChoosingTarget.value = true;
+                hintText.value = `請點擊上方敵人作為 【${card.name}】 的目標`;
+            } else {
+                // 直接使用的牌 (桃, 萬箭齊發, 南蠻入侵)
+                executePlayerCard(index, null);
+            }
+        };
+
+        const cancelTargetSelection = () => {
+            selectedCards.value = [];
+            isChoosingTarget.value = false;
+            selectedCardObject.value = null;
+            hintText.value = "你的回合：請選擇手牌使用";
+        };
+
+        const selectTarget = (target) => {
+            if(!isChoosingTarget.value || target.hp <= 0) return;
+            executePlayerCard(selectedCards.value[0], target);
+        };
+
+        const executePlayerCard = async (cardIndex, target) => {
+            const card = player.value.hand[cardIndex];
+            player.value.hand.splice(cardIndex, 1); // 先移除手牌
+            cancelTargetSelection();
+            
+            await useCardEffect(0, card, target);
+            
+            if (!gameOver.value && isMyTurn.value) {
+                hintText.value = "繼續出牌，或點擊「結束回合」";
+            }
+        };
+
+        const endTurn = () => {
+            if(!isMyTurn.value || gameOver.value) return;
+            
+            cancelTargetSelection();
+            const p = players.value[0];
+            
+            // 棄牌階段：若手牌大於體力，隨機棄牌 (簡化處理)
+            if (p.hand.length > p.hp) {
+                const dropCount = p.hand.length - p.hp;
+                addLog(`手牌超過體力上限，棄置 ${dropCount} 張牌`);
+                for(let i=0; i<dropCount; i++) {
+                    p.hand.splice(Math.floor(Math.random() * p.hand.length), 1);
+                }
+            }
+            
+            hintText.value = "回合結束";
+            nextTurn();
+        };
+
+        // --- 卡牌效果核心邏輯 ---
+
+        const useCardEffect = async (sourceId, card, target) => {
+            const source = players.value[sourceId];
+            let targetStr = target ? ` 對 ${target.name}` : "";
+            addLog(`▶ ${source.name}${targetStr} 使用了 【${card.name}】`, "text-blue-300 font-bold");
+
+            // 稍微停頓讓玩家看清楚出牌
+            await new Promise(r => setTimeout(r, 600));
+
+            if(card.name === "殺") {
+                const hasDodge = await requestCard(target.id, "閃", `${source.name} 對你打出【殺】`);
+                if(!hasDodge) {
+                    await takeDamage(target.id, 1, sourceId);
+                } else {
+                    addLog(`  ↳ ${target.name} 打出了 【閃】，躲避了攻擊！`, "text-gray-300");
+                }
+            } 
+            else if(card.name === "桃") {
+                if(source.hp < source.maxHp) {
+                    source.hp++;
+                    addLog(`  ↳ ${source.name} 恢復了 1 點體力 (目前: ${source.hp}/${source.maxHp})`, "text-green-400 font-bold");
+                }
+            } 
+            else if(card.name === "萬箭齊發") {
+                for(let p of players.value) {
+                    if(p.id !== sourceId && p.hp > 0 && !gameOver.value) {
+                        const hasDodge = await requestCard(p.id, "閃", `${source.name} 發動【萬箭齊發】`);
+                        if(!hasDodge) await takeDamage(p.id, 1, sourceId);
+                        else addLog(`  ↳ ${p.name} 打出【閃】躲過了萬箭`);
+                    }
+                }
+            } 
+            else if(card.name === "南蠻入侵") {
+                for(let p of players.value) {
+                    if(p.id !== sourceId && p.hp > 0 && !gameOver.value) {
+                        const hasSlash = await requestCard(p.id, "殺", `${source.name} 發動【南蠻入侵】`);
+                        if(!hasSlash) await takeDamage(p.id, 1, sourceId);
+                        else addLog(`  ↳ ${p.name} 打出【殺】擋下了南蠻`);
+                    }
+                }
+            } 
+            else if(card.name === "過河拆橋") {
+                if(target.hand.length > 0) {
+                    target.hand.splice(Math.floor(Math.random()*target.hand.length), 1);
+                    addLog(`  ↳ ${target.name} 被棄置了一張手牌`);
+                } else {
+                    addLog(`  ↳ 但 ${target.name} 沒有手牌`);
+                }
+            } 
+            else if(card.name === "順手牽羊") {
+                if(target.hand.length > 0) {
+                    const stolen = target.hand.splice(Math.floor(Math.random()*target.hand.length), 1)[0];
+                    source.hand.push(stolen);
+                    addLog(`  ↳ ${source.name} 偷走了 ${target.name} 的一張牌`);
+                } else {
+                    addLog(`  ↳ 但 ${target.name} 沒有手牌`);
+                }
+            }
+            
+            await new Promise(r => setTimeout(r, 400));
+        };
+
+        const takeDamage = async (targetId, amount, sourceId) => {
+            const target = players.value[targetId];
+            target.hp -= amount;
+            addLog(`💥 ${target.name} 受到 ${amount} 點傷害！ (剩餘體力: ${target.hp})`, "text-red-500 font-bold");
+            
+            // 瀕死求生 (簡化：只自己吃桃)
+            if(target.hp <= 0) {
+                const peachIndex = target.hand.findIndex(c => c.name === "桃");
+                if (peachIndex !== -1) {
+                    target.hand.splice(peachIndex, 1);
+                    target.hp++;
+                    addLog(`🍑 ${target.name} 在瀕死之際吃了一顆【桃】，挽回一命！`, "text-green-400 font-bold");
+                } else {
+                    addLog(`💀 ${target.name} 陣亡了！`, "text-gray-500 font-extrabold text-lg");
+                    checkWinCondition();
+                }
+            }
+        };
+
+        // 請求出牌 (閃/殺)
+        const requestCard = (playerId, reqCardName, reasonText) => {
+            return new Promise((resolve) => {
+                const p = players.value[playerId];
+                const cardIndex = p.hand.findIndex(c => c.name === reqCardName);
+
+                if(playerId === 0) { // 玩家互動
+                    if(cardIndex === -1) {
+                        addLog(`(你沒有【${reqCardName}】可以響應)`);
+                        setTimeout(() => resolve(false), 800);
+                    } else {
+                        showingReaction.value = true;
+                        reactionCardName.value = reqCardName;
+                        reactionPrompt.value = `${reasonText}，是否打出【${reqCardName}】？`;
+                        
+                        reactionResolveFunction = (willPlay) => {
+                            showingReaction.value = false;
+                            if(willPlay) {
+                                p.hand.splice(cardIndex, 1);
+                            }
+                            resolve(willPlay);
+                        };
+                    }
+                } else { // AI 自動判定
+                    setTimeout(() => {
+                        if(cardIndex !== -1) {
+                            p.hand.splice(cardIndex, 1);
+                            resolve(true);
+                        } else {
+                            resolve(false);
+                        }
+                    }, 800); // AI 反應時間
+                }
+            });
+        };
+
+        const handleReaction = (willPlay) => {
+            if(reactionResolveFunction) reactionResolveFunction(willPlay);
+        };
+
+        // --- AI 簡易邏輯 ---
+
+        const runAILogic = async (ai) => {
+            let usedSlash = false;
+            
+            // 模擬思考時間
+            await new Promise(r => setTimeout(r, 1200));
+
+            let i = 0;
+            while(i < ai.hand.length && !gameOver.value) {
+                const card = ai.hand[i];
+                let acted = false;
+
+                if(card.name === "桃" && ai.hp < ai.maxHp) {
+                    ai.hand.splice(i, 1);
+                    await useCardEffect(ai.id, card, null);
+                    acted = true;
+                } 
+                else if(card.name === "殺" && !usedSlash) {
+                    // 反賊只打玩家(主公)
+                    let target = players.value[0]; 
+                    if(target.hp > 0) {
+                        ai.hand.splice(i, 1);
+                        await useCardEffect(ai.id, card, target);
+                        usedSlash = true;
+                        acted = true;
+                    }
+                } 
+                else if(["萬箭齊發", "南蠻入侵"].includes(card.name)) {
+                    ai.hand.splice(i, 1);
+                    await useCardEffect(ai.id, card, null);
+                    acted = true;
+                }
+                else if(["順手牽羊", "過河拆橋"].includes(card.name)) {
+                    let target = players.value[0]; 
+                    if(target.hp > 0 && target.hand.length > 0) {
+                        ai.hand.splice(i, 1);
+                        await useCardEffect(ai.id, card, target);
+                        acted = true;
+                    }
+                }
+
+                if(acted) {
+                    await new Promise(r => setTimeout(r, 1000));
+                    i = 0; // 重新掃描手牌
+                } else {
+                    i++;
+                }
+            }
+
+            if(gameOver.value) return;
+
+            // 棄牌
+            while(ai.hand.length > ai.hp) ai.hand.pop();
+            
+            setTimeout(nextTurn, 1000);
+        };
+
+        const checkWinCondition = () => {
+            const lordAlive = players.value[0].hp > 0;
+            const rebelsAlive = players.value.some(p => p.role === 'rebel' && p.hp > 0);
+
+            if(!lordAlive) {
+                gameOver.value = true;
+                playerWon.value = false;
+                gameOverReason.value = "主公陣亡，反賊取得了勝利！";
+            } else if(!rebelsAlive) {
+                gameOver.value = true;
+                playerWon.value = true;
+                gameOverReason.value = "所有反賊皆已伏法，主公獲勝！";
+            }
+        };
+
+        const restartGame = () => {
+            initGame();
+        };
+
+        onMounted(initGame);
+
+        return {
+            players, player, enemies, logs, currentTurn, hintText,
+            selectedCards, isChoosingTarget, isMyTurn, 
+            clickCard, selectTarget, cancelTargetSelection, endTurn,
+            showingReaction, reactionPrompt, reactionCardName, handleReaction,
+            gameOver, playerWon, gameOverReason, restartGame
+        };
+    }
+}).mount('#app');
+</script>
+</body>
+</html>
