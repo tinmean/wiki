@@ -65,13 +65,9 @@
         <div class="max-w-4xl mx-auto text-center relative z-10">
             <!-- Profile Photo -->
             <div class="mb-8 relative inline-block group">
-                <div class="w-32 h-32 md:w-44 md:h-44 rounded-2xl border-4 border-white shadow-xl p-0 mx-auto overflow-hidden bg-white rotate-3 group-hover:rotate-0 transition-transform duration-500">
-                    <img 
-                        src="image_8ad64a.jpg" 
-                        alt="老K" 
-                        class="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-500"
-                        onerror="this.src='https://ui-avatars.com/api/?name=K&background=d97706&color=fff&size=200'"
-                    >
+                <div class="w-32 h-32 md:w-44 md:h-44 rounded-2xl border-4 border-white shadow-xl p-0 mx-auto overflow-hidden bg-amber-700 rotate-3 group-hover:rotate-0 transition-transform duration-500 flex flex-col items-center justify-center text-white">
+                    <span class="text-4xl md:text-5xl font-black tracking-widest">手面相</span>
+                    <span class="text-xs md:text-sm mt-2 text-amber-100 tracking-wide">看手 · 看面 · 看氣色</span>
                 </div>
                 <div class="absolute -bottom-2 right-4 bg-white text-amber-700 px-4 py-1 rounded-full text-sm font-bold shadow-md border border-amber-50/50 whitespace-nowrap">
                     台南 / 線上諮詢
@@ -123,14 +119,13 @@
                     <i data-lucide="book-open" class="w-5 h-5"></i> 知識庫
                 </a>
                 
-                <!-- Tertiary Action: Newsletter -->
-                <a 
-                    href="https://kfacehand.kit.com"
-                    target="_blank"
-                    class="w-full sm:w-auto bg-transparent hover:bg-stone-100 text-slate-500 font-semibold py-4 px-6 rounded-full transition-all border border-transparent hover:border-stone-200 flex items-center justify-center gap-2"
-                >
-                    <i data-lucide="mail" class="w-5 h-5"></i> 訂閱電子報
-                </a>
+            </div>
+
+            <!-- Newsletter: inline subscribe box (Kit form A) -->
+            <div class="mt-10 max-w-xl mx-auto bg-white rounded-3xl border border-amber-100 shadow-sm p-6 text-left">
+                <h2 class="font-bold text-slate-800 text-lg">訂閱老K電子報</h2>
+                <p class="text-slate-500 text-sm mt-1 mb-4">每週一封，看相觀念與職場觀察。免費訂閱，隨時可以退訂。</p>
+                <script async data-uid="bbcb9323cc" src="https://kfacehand.kit.com/bbcb9323cc/index.js"></script>
             </div>
         </div>
     </section>
@@ -142,6 +137,30 @@
             <div class="flex items-center gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-amber-500"></i><span class="font-medium tracking-wide">職涯路徑調整</span></div>
             <div class="flex items-center gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-amber-500"></i><span class="font-medium tracking-wide">流年運勢建議</span></div>
             <div class="flex items-center gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-amber-500"></i><span class="font-medium tracking-wide">感情盲點釐清</span></div>
+        </div>
+    </section>
+
+    <!-- About 老K -->
+    <section class="py-20 px-6 max-w-5xl mx-auto">
+        <div class="bg-white rounded-3xl border border-stone-100 shadow-sm p-8 md:p-10">
+            <span class="text-amber-600 font-bold tracking-widest uppercase text-sm mb-2 block">認識老K</span>
+            <h2 class="text-2xl md:text-3xl font-bold mb-4 text-slate-800">我是老K，工程博士畢業。</h2>
+            <p class="text-slate-500 leading-relaxed mb-4">看相三十餘年，卜卦將近二十年。人相師承雲昇老師，八字師承鍾善泓老師。2023 年起開課，教手相、面相、骨相、氣色。</p>
+            <p class="text-slate-500 leading-relaxed mb-6">看相到底準不準？先說清楚你想問的「準」是什麼。</p>
+            <div class="flex flex-wrap gap-x-8 gap-y-3 text-sm text-slate-600">
+                <span><strong class="text-amber-700">30 餘年</strong> 看相</span>
+                <span><strong class="text-amber-700">近 20 年</strong> 卜卦</span>
+                <span><strong class="text-amber-700">2023 年起</strong> 開課教學</span>
+                <span><strong class="text-amber-700">4 門課</strong> 手相 · 面相 · 骨相 · 氣色</span>
+            </div>
+            <div class="mt-8 pt-6 border-t border-stone-100">
+                <p class="font-bold text-slate-700 mb-3">第一次來？三步驟：</p>
+                <ol class="list-decimal list-inside space-y-1 text-slate-500 text-sm md:text-base">
+                    <li>訂閱電子報，每週收到一篇看相觀念。</li>
+                    <li>免費玩一款練習遊戲，先練看哪裡、看的順序。</li>
+                    <li>讀〈看相到底準不準？〉，再決定要不要上課。</li>
+                </ol>
+            </div>
         </div>
     </section>
 
@@ -201,7 +220,10 @@
                     <h3 class="text-lg font-bold text-slate-800">老客人流年氣色</h3>
                     <span class="text-slate-500 font-mono text-sm">3000 / 小時</span>
                 </div>
-                <p class="text-slate-400 text-sm leading-relaxed">專為老客戶提供的定期運勢守護，重點觀察當年度的氣色起伏與流年建議。</p>
+                <p class="text-slate-400 text-sm leading-relaxed mb-6">專為老客戶提供的定期運勢守護，重點觀察當年度的氣色起伏與流年建議。</p>
+                <a href="https://learn.kfacehand.com/product/facehand_service/" target="_blank" class="inline-flex items-center text-amber-600 font-bold text-sm hover:underline decoration-2 underline-offset-4">
+                    立即預約 <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
+                </a>
             </div>
 
             <!-- Service 4 -->
@@ -270,6 +292,67 @@
         </div>
     </section>
 
+    <!-- Free resources: games -->
+    <section class="py-24 px-6 max-w-6xl mx-auto">
+        <div class="text-center mb-12">
+            <span class="text-amber-600 font-bold tracking-widest uppercase text-sm mb-2 block">免費資源</span>
+            <h2 class="text-3xl md:text-4xl font-bold mb-4 text-slate-800">先免費玩，再決定要不要學</h2>
+            <p class="text-slate-500">全部免費，不用註冊。只練「看哪裡、看的順序」，把基本功先練好。</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <a href="https://learn.kfacehand.com/palm/" target="_blank" class="block p-6 rounded-3xl bg-white border border-stone-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all">
+                <h3 class="font-bold text-slate-800 text-lg mb-2">手相學徒出師記</h3>
+                <p class="text-slate-500 text-sm leading-relaxed">練手相的基本功：先看哪裡，再看順序。</p>
+            </a>
+            <a href="https://learn.kfacehand.com/face/" target="_blank" class="block p-6 rounded-3xl bg-white border border-stone-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all">
+                <h3 class="font-bold text-slate-800 text-lg mb-2">面相菜鳥闖天涯</h3>
+                <p class="text-slate-500 text-sm leading-relaxed">練面相的基本功：五官十二宮，看哪裡、怎麼看。</p>
+            </a>
+            <a href="https://learn.kfacehand.com/bazi-game/" target="_blank" class="block p-6 rounded-3xl bg-white border border-stone-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all">
+                <h3 class="font-bold text-slate-800 text-lg mb-2">八字新手村</h3>
+                <p class="text-slate-500 text-sm leading-relaxed">一關一關練，從天干地支到刑衝合會。</p>
+            </a>
+            <a href="https://learn.kfacehand.com/yi-game/index.html" target="_blank" class="block p-6 rounded-3xl bg-white border border-stone-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all">
+                <h3 class="font-bold text-slate-800 text-lg mb-2">易經訓練營</h3>
+                <p class="text-slate-500 text-sm leading-relaxed">練易經基本功，記卦、解卦慢慢來。</p>
+            </a>
+            <a href="https://learn.kfacehand.com/pillar/" target="_blank" class="block p-6 rounded-3xl bg-white border border-stone-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all">
+                <h3 class="font-bold text-slate-800 text-lg mb-2">干支對弈</h3>
+                <p class="text-slate-500 text-sm leading-relaxed">用牌桌練干支、神煞，試玩桌直接開局。</p>
+            </a>
+            <a href="https://learn.kfacehand.com/cards" target="_blank" class="block p-6 rounded-3xl bg-white border border-stone-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all">
+                <h3 class="font-bold text-slate-800 text-lg mb-2">百牌譜</h3>
+                <p class="text-slate-500 text-sm leading-relaxed">100 種撲克牌遊戲，免費、復古、動腦。</p>
+            </a>
+        </div>
+        <p class="text-center mt-8 text-slate-500 text-sm">想占一卦？<a href="https://gua.kfacehand.com" target="_blank" class="text-amber-600 font-bold hover:underline">六爻占卜</a> 和 <a href="https://learn.kfacehand.com/poker/" target="_blank" class="text-amber-600 font-bold hover:underline">看相觀年</a> 也可以免費試試。</p>
+    </section>
+
+    <!-- Latest articles -->
+    <section class="py-24 px-6 bg-white border-y border-stone-100">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-12">
+                <span class="text-amber-600 font-bold tracking-widest uppercase text-sm mb-2 block">最新文章</span>
+                <h2 class="text-3xl md:text-4xl font-bold mb-4 text-slate-800">老K知識庫，最新三篇</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <a href="https://wiki.kfacehand.com/%e7%9c%8b%e7%9b%b8%e5%88%b0%e5%ba%95%e6%ba%96%e4%b8%8d%e6%ba%96%ef%bc%9f%e5%85%88%e8%aa%aa%e6%b8%85%e6%a5%9a%e4%bd%a0%e6%83%b3%e5%95%8f%e7%9a%84%e3%80%8c%e6%ba%96%e3%80%8d%e6%98%af%e4%bb%80%e9%ba%bc/" target="_blank" class="block p-6 rounded-3xl bg-stone-50 border border-stone-100 hover:shadow-lg transition-all">
+                    <h3 class="font-bold text-slate-800 text-lg mb-2">看相到底準不準？先說清楚你想問的「準」是什麼</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed">你說的準，是看出個性，還是說出哪一年發財？判斷難度不同，驗證的方法也不同。</p>
+                </a>
+                <a href="https://wiki.kfacehand.com/%e8%b2%a1%e5%af%8c%e8%87%aa%e7%94%b1%e3%80%81%e8%83%bd%e5%8a%9b%e8%88%87%e9%81%8b%e6%b0%a3/" target="_blank" class="block p-6 rounded-3xl bg-stone-50 border border-stone-100 hover:shadow-lg transition-all">
+                    <h3 class="font-bold text-slate-800 text-lg mb-2">財富自由、能力與運氣</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed">自由是你先有獨特的能力，能解決別人的問題，人家願意掏錢給你。</p>
+                </a>
+                <a href="https://wiki.kfacehand.com/%e8%80%83%e8%a9%a6%e8%88%87%e8%80%83%e9%81%8b%ef%bc%9a%e9%81%8b%e6%b0%a3%e4%b8%8d%e5%a5%bd%ef%bc%8c%e5%b0%b1%e5%8f%aa%e8%83%bd%e8%aa%8d%e5%91%bd%e5%97%8e%ef%bc%9f/" target="_blank" class="block p-6 rounded-3xl bg-stone-50 border border-stone-100 hover:shadow-lg transition-all">
+                    <h3 class="font-bold text-slate-800 text-lg mb-2">考試與考運：運氣不好，就只能認命嗎？</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed">把考試拆開來看，哪些可以靠方法改善，就不用全部推給運氣。</p>
+                </a>
+            </div>
+            <p class="text-center mt-8"><a href="https://wiki.kfacehand.com" target="_blank" class="text-amber-600 font-bold hover:underline">看更多文章 →</a></p>
+        </div>
+    </section>
+
     <!-- Social Proof / Testimonials (Simpler Version) -->
     <section class="py-24 px-6 max-w-6xl mx-auto">
         <div class="text-center">
@@ -318,6 +401,20 @@
                     </summary>
                     <p class="text-slate-500 mt-4 leading-relaxed">老K的工作室位於台南市區。預約確認後，我會將詳細地址與交通方式傳送給您。</p>
                 </details>
+                <details class="group bg-white rounded-2xl p-6 cursor-pointer border border-stone-200 open:shadow-md transition-all">
+                    <summary class="flex justify-between items-center font-bold text-slate-700 list-none">
+                        訂閱電子報要錢嗎？
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-stone-400 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <p class="text-slate-500 mt-4 leading-relaxed">不用錢，每週一封，看相觀念與職場觀察。隨時可以退訂。</p>
+                </details>
+                <details class="group bg-white rounded-2xl p-6 cursor-pointer border border-stone-200 open:shadow-md transition-all">
+                    <summary class="flex justify-between items-center font-bold text-slate-700 list-none">
+                        沒基礎也可以上課嗎？
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-stone-400 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <p class="text-slate-500 mt-4 leading-relaxed">可以。手相從三主紋開始，學會看懂真實掌紋後，其他的都可以自己慢慢看懂了。課堂多實戰，沒基礎也跟得上。</p>
+                </details>
             </div>
         </div>
     </section>
@@ -346,10 +443,6 @@
     <!-- Footer -->
     <footer class="py-12 border-t border-stone-200 text-center text-slate-400 text-sm bg-stone-50">
         <p class="font-bold tracking-widest uppercase text-slate-600">K FACE & HAND</p>
-        <div class="mt-4 flex justify-center gap-6 text-xs">
-            <a href="#" class="hover:text-amber-600">服務條款</a>
-            <a href="#" class="hover:text-amber-600">隱私權政策</a>
-        </div>
         <p class="mt-6 text-xs">© <span id="year"></span> 老K的命理實驗室 | 台南命理諮詢</p>
     </footer>
 
